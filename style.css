@@ -1,9 +1,180 @@
+/* Basic Reset & Body Styling */
 body {
-    font-family: sans-serif;
+    margin: 0;
+    font-family: Arial, sans-serif; /* Choose a font similar to your Google Site */
     line-height: 1.6;
-    margin: 20px;
+    color: #333; /* Adjust text color as needed */
+    /* Apply banner background here if desired, or within the header */
+    background-image: url('images/banner-background.jpg'); /* ADJUST PATH */
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed; /* Optional: keeps background fixed */
 }
 
-h1 {
-    color: navy;
+/* Header and Navigation */
+header {
+    color: white; /* Assuming text is light over the dark banner */
+    padding-top: 20px; /* Adjust as needed */
+}
+
+nav {
+    display: flex;
+    justify-content: space-between; /* Pushes title left, menu right */
+    align-items: center;
+    max-width: 1200px; /* Adjust max-width */
+    margin: 0 auto; /* Center the nav */
+    padding: 0 20px;
+    background-color: rgba(0, 0, 0, 0.3); /* Slight dark background for readability */
+    border-radius: 5px; /* Optional */
+}
+
+.site-title a {
+    color: white;
+    text-decoration: none;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+}
+
+nav ul li {
+    margin-left: 20px; /* Space between menu items */
+}
+
+nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 1em;
+    padding: 10px 5px;
+    display: block;
+}
+
+nav ul li a:hover,
+nav ul li a.active {
+    border-bottom: 2px solid white; /* Highlight for active/hover */
+}
+
+/* Centered "Home" Title below nav */
+.page-title {
+    text-align: center;
+    padding: 30px 20px; /* Adjust spacing */
+    margin-bottom: 30px; /* Space before main content */
+}
+
+.page-title h1 {
+    margin: 0;
+    font-size: 2.5em;
+    font-weight: normal;
+    display: inline-block;
+    background-color: rgba(0, 0, 0, 0.5); /* Background for title */
+    padding: 5px 15px;
+    border-radius: 5px;
+}
+
+/* Main Content Area */
+main {
+    max-width: 1000px; /* Adjust content width */
+    margin: 20px auto; /* Center content, add space top/bottom */
+    padding: 30px;
+    background-color: white; /* White background for content area */
+    box-shadow: 0 0 10px rgba(0,0,0,0.1); /* Optional shadow */
+    border-radius: 5px; /* Optional rounded corners */
+}
+
+.content-wrapper {
+    display: flex;
+    gap: 30px; /* Space between columns */
+    align-items: flex-start; /* Align items to the top */
+}
+
+.bio-text {
+    flex: 3; /* Take up more space */
+}
+
+.bio-image {
+    flex: 1; /* Take up less space */
+    text-align: center;
+}
+
+.bio-image img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px; /* Optional rounded corners for image */
+    border: 1px solid #eee; /* Optional light border */
+}
+
+.bio-image .caption {
+    font-size: 0.8em;
+    color: #777;
+    margin-top: 5px;
+}
+
+/* Headings and Paragraphs */
+h2 {
+    font-size: 1.8em;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+h3 {
+    font-size: 1.4em;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: #444;
+}
+
+h4 {
+    font-size: 1.1em;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    color: #555;
+}
+
+p {
+    margin-bottom: 10px;
+}
+
+.bio-paragraph {
+    margin-top: 20px;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    margin-top: 40px;
+    padding: 20px;
+    font-size: 0.9em;
+    color: #ccc; /* Lighter text color for footer over background */
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent footer background */
+}
+
+/* Responsive adjustments (optional basic example) */
+@media (max-width: 768px) {
+    nav {
+        flex-direction: column;
+        padding: 10px;
+    }
+    nav ul {
+        margin-top: 10px;
+        flex-wrap: wrap; /* Allow nav items to wrap */
+        justify-content: center;
+    }
+     nav ul li {
+        margin: 5px 10px;
+    }
+    .content-wrapper {
+        flex-direction: column;
+    }
+    .bio-image {
+        margin-top: 20px;
+        max-width: 250px; /* Limit image width on small screens */
+        margin-left: auto;
+        margin-right: auto;
+    }
 }
