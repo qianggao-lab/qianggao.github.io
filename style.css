@@ -190,6 +190,95 @@ main p {
 }
 
 /* =========================================
+   Publications Page Specific Styles
+   ========================================= */
+
+.publications-content {
+    padding: 10px 20px 20px 20px; /* Adjust padding as needed */
+}
+
+/* Scholar Snippet Box */
+.scholar-snippet {
+    background-color: #f9f9f9; /* Light background for the snippet */
+    border: 1px solid #eee;
+    padding: 15px;
+    margin-bottom: 30px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    line-height: 1.5;
+}
+
+.scholar-snippet p {
+    margin: 0;
+}
+
+.scholar-snippet a {
+    text-decoration: none;
+    color: #007bff; /* Standard link color */
+    font-weight: bold;
+}
+
+.scholar-snippet a:hover {
+    text-decoration: underline;
+}
+
+/* Publication Section Headings */
+.publication-section h2 {
+    font-size: 1.7em;
+    margin-top: 40px; /* Space above major sections */
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee; /* Separator line */
+    padding-bottom: 5px;
+}
+
+.publication-section h2:first-of-type {
+     margin-top: 0; /* No top margin for the very first section heading after snippet */
+}
+
+h3.year-heading {
+    font-size: 1.3em;
+    margin-top: 30px; /* Space above year */
+    margin-bottom: 15px;
+    color: #555;
+}
+
+/* Publication List Styling */
+ul.publication-list {
+    list-style: none; /* Remove default bullets */
+    padding-left: 0; /* Remove default padding */
+    margin-bottom: 20px;
+}
+
+ul.publication-list li {
+    margin-bottom: 15px; /* Space between publication entries */
+    padding-left: 1.5em; /* Indentation */
+    position: relative;
+    line-height: 1.5;
+}
+
+/* Optional: Add custom bullet or number effect */
+ul.publication-list li::before {
+    content: "•"; /* Bullet character */
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: #888; /* Bullet color */
+    font-weight: bold;
+}
+
+/* Ensure journal titles are italic */
+ul.publication-list li em,
+ul.publication-list li i {
+    font-style: italic;
+}
+
+/* Ensure author name is bold if desired */
+ul.publication-list li strong,
+ul.publication-list li b {
+    font-weight: bold;
+}
+
+/* =========================================
    Footer
    ========================================= */
 footer {
