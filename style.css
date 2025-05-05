@@ -1,360 +1,398 @@
 /* =========================================
    CSS Variables (Color Palette & Fonts)
    ========================================= */
-   :root {
-    --primary-color: #0d47a1;    /* Dark Blue */
-    --secondary-color: #1976d2;  /* Medium Blue */
-    --accent-color: #f57c00;     /* Orange/Amber */
-    --light-bg: #f8f9fa;         /* Very Light Grey */
-    --content-bg: #ffffff;       /* White */
-    --dark-text: #212529;         /* Near Black */
-    --light-text: #ffffff;       /* White */
-    --border-color: #dee2e6;     /* Light Grey */
-    --footer-bg: rgba(13, 71, 161, 0.85); /* Dark blue footer, slightly transparent */
-  
-    --font-body: 'Lato', sans-serif;
-    --font-heading: 'Montserrat', sans-serif;
-  }
-  
-  /* =========================================
-     Base Styles & Body
-     ========================================= */
-  body {
-      margin: 0;
-      font-family: var(--font-body);
-      line-height: 1.7; /* Slightly increased line height */
-      color: var(--dark-text);
-      background-color: var(--light-bg); /* Default background for areas outside banner */
-      /* Banner background applied via specific class now */
-  }
-  
-  /* Apply banner background ONLY to homepage body */
-  body.homepage {
-      /* ADJUST PATH */
-      background-image: url('images/banner-background.jpg');
-      background-size: cover;
-      background-position: center center;
-      background-repeat: no-repeat;
-      background-attachment: fixed;
-  }
-  
-  /* =========================================
-     Links & Transitions
-     ========================================= */
-  a {
-      color: var(--secondary-color);
-      text-decoration: none;
-      transition: color 0.2s ease-in-out;
-  }
-  
-  a:hover {
-      color: var(--accent-color);
-      text-decoration: underline;
-  }
-  
-  /* =========================================
-     Header, Navigation & Page Title
-     ========================================= */
-  header {
-      color: var(--light-text);
-      padding-top: 20px;
-      /* Background applied via body.homepage */
-  }
-  
-  nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 5px 20px; /* Adjusted padding */
-      background-color: rgba(13, 71, 161, 0.8); /* Dark Blue Nav Background - Adjust opacity */
-      border-radius: 5px;
-  }
-  
-  .site-title a {
-      color: var(--light-text);
-      text-decoration: none;
-      font-family: var(--font-heading);
-      font-size: 1.6em;
-      font-weight: 700; /* Bold */
-  }
-  .site-title a:hover {
-      text-decoration: none;
-      color: var(--light-text); /* Keep white on hover */
-  }
-  
-  
-  nav ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      display: flex;
-      align-items: center;
-  }
-  
-  nav ul li {
-      margin-left: 25px; /* Increased spacing */
-  }
-  
-  nav ul li a {
-      color: var(--light-text);
-      text-decoration: none;
-      font-family: var(--font-body);
-      font-size: 1em;
-      font-weight: 700; /* Bolder nav links */
-      padding: 10px 0px; /* Remove side padding, use margin on li */
-      display: block;
-      border-bottom: 3px solid transparent; /* Thicker transparent border */
-      transition: border-bottom 0.2s ease-in-out;
-  }
-  
-  nav ul li a.active,
-  nav ul li a:hover {
-      border-bottom: 3px solid var(--accent-color); /* Accent color border */
-      color: var(--light-text); /* Keep text white */
-      text-decoration: none;
-  }
-  
-  /* Centered Page Title (Used on Homepage) */
-  .page-title {
-      text-align: center;
-      padding: 40px 20px; /* More padding */
-      margin-bottom: 40px;
-  }
-  
-  .page-title h1 {
-      margin: 0;
-      font-family: var(--font-heading);
-      font-size: 3em; /* Larger title */
-      font-weight: 700; /* Bold title */
-      display: inline-block;
-      background-color: rgba(0, 0, 0, 0.6); /* Darker background */
-      padding: 10px 25px;
-      border-radius: 5px;
-      color: var(--light-text);
-  }
-  
-  /* =========================================
-     Main Content Area (Card Styling)
-     ========================================= */
-  main {
-      max-width: 1000px;
-      margin: 40px auto; /* More vertical margin */
-      padding: 40px 50px; /* More internal padding */
-      background-color: var(--content-bg); /* White background */
-      border-radius: 8px; /* Softer corners */
-      box-shadow: 0 5px 20px rgba(0,0,0,0.1); /* More pronounced shadow */
-      min-height: 400px;
-  }
-  
-  /* General Headings and Paragraphs in Main */
-  main h1, main h2, main h3, main h4, main h5, main h6 {
-       font-family: var(--font-heading);
-       font-weight: 700; /* Bold headings */
-       color: var(--primary-color); /* Dark blue headings */
-       margin-bottom: 0.75em; /* Consistent bottom margin */
-  }
-  main h2 { font-size: 1.8em; margin-top: 1.5em; }
-  main h3 { font-size: 1.4em; margin-top: 1.5em; color: var(--secondary-color); } /* Medium blue for h3 */
-  main h4 { font-size: 1.1em; margin-top: 1.5em; color: var(--dark-text); }
-  
-  main h2:first-child, main h3:first-child, main h4:first-child {
-      margin-top: 0; /* No top margin for the very first heading */
-  }
-  
-  main p {
-      margin-bottom: 1.2em; /* More space between paragraphs */
-  }
-  
-  /* =========================================
-     Homepage Specific Styles (Bio Section)
-     ========================================= */
-  .content-wrapper {
-      display: flex;
-      gap: 40px; /* More space between columns */
-      align-items: flex-start;
-  }
-  
-  .bio-text {
-      flex: 3;
-  }
-  
-  .bio-image {
-      flex: 1;
-      text-align: center;
-  }
-  
-  .bio-image img {
-      max-width: 100%;
-      height: auto;
-      border-radius: 8px; /* Match main card radius */
-      border: 1px solid var(--border-color);
-  }
-  
-  .bio-image .caption {
-      font-size: 0.85em;
-      color: #6c757d; /* Grey caption text */
-      margin-top: 8px;
-  }
-  
-  .bio-paragraph {
-      margin-top: 20px;
-  }
-  
-  /* =========================================
-     Research Page Specific Styles
-     ========================================= */
-  .research-content {
-      padding: 10px 0; /* Padding handled by main, maybe add vertical padding? */
-  }
-  
-  .research-content ul {
-      list-style: disc;
-      margin-left: 25px; /* Deeper indent */
-      margin-bottom: 25px;
-  }
-  
-  .research-content ul li {
-      margin-bottom: 10px; /* Space between list items */
-  }
-  
-  /* =========================================
-     Publications Page Specific Styles
-     ========================================= */
-  .publications-content {
-       padding: 10px 0;
-  }
-  
-  /* Scholar Snippet Box */
-  .scholar-snippet {
-      background-color: var(--light-bg); /* Use light grey bg */
-      border: 1px solid var(--border-color);
-      padding: 20px; /* More padding */
-      margin-bottom: 40px; /* More space below */
-      border-radius: 6px;
-      font-size: 0.95em;
-      line-height: 1.6;
-  }
-  
-  .scholar-snippet p {
-      margin: 0;
-  }
-  
-  .scholar-snippet a {
-      font-weight: bold;
-      color: var(--primary-color); /* Use primary color for this important link */
-  }
-  .scholar-snippet a:hover {
-      color: var(--accent-color);
-  }
-  
-  /* Publication Section Headings */
-  .publication-section h2 {
-      border-bottom: 2px solid var(--primary-color); /* Thicker, colored border */
-      padding-bottom: 10px;
-      margin-top: 40px;
-      margin-bottom: 25px;
-  }
-  .publication-section h2:first-of-type {
-       margin-top: 0;
-  }
-  
-  h3.year-heading {
-      font-size: 1.3em;
-      margin-top: 30px;
-      margin-bottom: 20px; /* More space below year */
-      color: var(--secondary-color);
-      border-bottom: 1px dashed var(--border-color); /* Dashed line for year */
-      padding-bottom: 5px;
-  }
-  
-  /* Publication List Styling */
-  ul.publication-list {
-      list-style: none;
-      padding-left: 0;
-      margin-bottom: 25px;
-  }
-  
-  ul.publication-list li {
-      margin-bottom: 18px;
-      padding-left: 1.8em; /* More indent */
-      position: relative;
-      line-height: 1.6;
-  }
-  
-  ul.publication-list li::before {
-      content: "▪"; /* Square bullet */
-      position: absolute;
-      left: 0;
-      top: 0.1em; /* Adjust vertical alignment */
-      color: var(--secondary-color); /* Use secondary color */
-      font-size: 1.1em;
-  }
-  
-  ul.publication-list li em,
-  ul.publication-list li i {
-      font-style: italic;
-      color: #555; /* Slightly muted color for journal */
-  }
-  
-  ul.publication-list li strong,
-  ul.publication-list li b {
-      font-weight: bold; /* Uses body font weight (700) */
-  }
-  
-  /* =========================================
-     Footer
-     ========================================= */
-  footer {
-      text-align: center;
-      margin-top: 50px; /* More space above footer */
-      padding: 25px;
-      font-size: 0.9em;
-      color: var(--light-text);
-      background-color: var(--footer-bg); /* Use variable */
-  }
-  
-  /* =========================================
-     Responsive Design Adjustments
-     ========================================= */
-  @media (max-width: 768px) {
-      nav {
-          padding: 10px;
-      }
-       nav ul li {
-          margin: 5px 10px;
-      }
-      .page-title h1 {
-          font-size: 2em;
-      }
-      main {
-          padding: 30px 25px; /* Adjust padding */
-          margin-left: 10px;
-          margin-right: 10px;
-      }
-      .content-wrapper {
-          flex-direction: column;
-      }
-      .bio-image {
-          margin-top: 30px; /* More space when stacked */
-          max-width: 250px;
-          margin-left: auto;
-          margin-right: auto;
-      }
-      .publications-content, .research-content {
-           padding: 0; /* Remove extra padding, rely on main */
-      }
-  }
-  
-  @media (max-width: 480px) {
-      body { line-height: 1.6; } /* Adjust base line height */
-      .site-title a { font-size: 1.3em; }
-      nav ul li a { font-size: 0.9em; }
-      .page-title h1 { font-size: 1.8em; }
-      main { padding: 20px 15px; }
-      main h2 { font-size: 1.5em; }
-      main h3 { font-size: 1.2em; }
-      ul.publication-list li { padding-left: 1.5em; } /* Adjust indent */
-      ul.publication-list li::before { font-size: 1em; }
-  }
+:root {
+  --primary-color: #0d47a1;    /* Dark Blue */
+  --secondary-color: #1976d2;  /* Medium Blue */
+  --accent-color: #f57c00;     /* Orange/Amber */
+  --light-bg: #f8f9fa;         /* Very Light Grey */
+  --content-bg: #ffffff;       /* White */
+  --dark-text: #212529;         /* Near Black */
+  --light-text: #ffffff;       /* White */
+  --border-color: #dee2e6;     /* Light Grey */
+  --footer-bg: rgba(13, 71, 161, 0.85); /* Dark blue footer, slightly transparent */
+
+  --font-body: 'Lato', sans-serif;
+  --font-heading: 'Montserrat', sans-serif;
+}
+
+/* =========================================
+   Base Styles & Body
+   ========================================= */
+/* =========================================
+   Base Styles & Body
+   ========================================= */
+   body {
+    margin: 0;
+    font-family: var(--font-body);
+    line-height: 1.7;
+    color: var(--dark-text);
+    /* background-color: var(--light-bg); */ /* <-- REMOVE or comment out this line */
+
+    /* Background Image Properties MOVED HERE - ADJUST PATH if needed */
+    background-image: url('images/banner-background.jpg');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+/* This rule is now empty or can be deleted */
+body.homepage {
+    /* Background properties were moved FROM here */
+}
+
+/* =========================================
+   Links & Transitions
+   ========================================= */
+a {
+    color: var(--secondary-color);
+    text-decoration: none;
+    transition: color 0.2s ease-in-out;
+}
+
+a:hover {
+    color: var(--accent-color);
+    text-decoration: underline;
+}
+
+/* =========================================
+   Header, Navigation & Page Title
+   ========================================= */
+header {
+    color: var(--light-text);
+    padding-top: 20px;
+    /* Background applied via body.homepage or default body bg */
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 5px 20px;
+    background-color: rgba(13, 71, 161, 0.8); /* Dark Blue Nav Background - Adjust opacity */
+    border-radius: 5px;
+}
+
+.site-title a {
+    color: var(--light-text);
+    text-decoration: none;
+    font-family: var(--font-heading);
+    font-size: 1.6em;
+    font-weight: 700; /* Bold */
+}
+.site-title a:hover {
+    text-decoration: none;
+    color: var(--light-text);
+}
+
+
+nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+nav ul li {
+    margin-left: 25px;
+}
+
+nav ul li a {
+    color: var(--light-text);
+    text-decoration: none;
+    font-family: var(--font-body);
+    font-size: 1em;
+    font-weight: 700;
+    padding: 10px 0px;
+    display: block;
+    border-bottom: 3px solid transparent;
+    /* Added transition specifically for the border */
+    transition: border-bottom 0.2s ease-in-out;
+}
+
+nav ul li a.active,
+nav ul li a:hover {
+    border-bottom: 3px solid var(--accent-color);
+    color: var(--light-text);
+    text-decoration: none;
+}
+
+/* Centered Page Title (Used on Homepage) */
+.page-title {
+    text-align: center;
+    padding: 40px 20px;
+    margin-bottom: 40px;
+}
+
+.page-title h1 {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: 3em;
+    font-weight: 700;
+    display: inline-block;
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 10px 25px;
+    border-radius: 5px;
+    color: var(--light-text);
+}
+
+/* =========================================
+   Main Content Area (Card Styling)
+   ========================================= */
+main {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 40px 50px;
+    /* background-color: var(--content-bg); */
+    background-color: rgba(255, 255, 255, 0.85); /* 85% opaque white */
+    border-radius: 8px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    min-height: 400px;
+}
+
+/* General Headings and Paragraphs in Main */
+main h1, main h2, main h3, main h4, main h5, main h6 {
+     font-family: var(--font-heading);
+     font-weight: 700;
+     color: var(--primary-color);
+     margin-bottom: 0.75em;
+}
+main h2 { font-size: 1.8em; margin-top: 1.5em; }
+main h3 { font-size: 1.4em; margin-top: 1.5em; color: var(--secondary-color); }
+main h4 { font-size: 1.1em; margin-top: 1.5em; color: var(--dark-text); }
+
+main h2:first-child, main h3:first-child, main h4:first-child, main .cv-container h2:first-child {
+    margin-top: 0; /* No top margin for the very first heading in main or specific divs */
+}
+
+
+main p {
+    margin-bottom: 1.2em;
+}
+
+/* =========================================
+   Homepage Specific Styles (Bio Section)
+   ========================================= */
+.content-wrapper {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+}
+
+.bio-text {
+    flex: 3;
+}
+
+.bio-image {
+    flex: 1;
+    text-align: center;
+}
+
+.bio-image img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    /* Remember to set the actual src in index.html */
+}
+
+.bio-image .caption {
+    font-size: 0.85em;
+    color: #6c757d;
+    margin-top: 8px;
+}
+
+.bio-paragraph {
+    margin-top: 20px;
+}
+
+/* =========================================
+   Research Page Specific Styles
+   ========================================= */
+.research-content {
+    padding: 10px 0;
+}
+
+.research-content ul {
+    list-style: disc;
+    margin-left: 25px;
+    margin-bottom: 25px;
+}
+
+.research-content ul li {
+    margin-bottom: 10px;
+}
+
+/* =========================================
+   Publications Page Specific Styles
+   ========================================= */
+.publications-content {
+     padding: 10px 0;
+}
+
+/* Scholar Snippet Box */
+.scholar-snippet {
+    background-color: var(--light-bg);
+    border: 1px solid var(--border-color);
+    padding: 20px;
+    margin-bottom: 40px;
+    border-radius: 6px;
+    font-size: 0.95em;
+    line-height: 1.6;
+}
+
+.scholar-snippet p {
+    margin: 0;
+}
+
+.scholar-snippet a {
+    font-weight: bold;
+    color: var(--primary-color);
+}
+.scholar-snippet a:hover {
+    color: var(--accent-color);
+}
+
+/* Publication Section Headings */
+.publication-section h2 {
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 10px;
+    margin-top: 40px;
+    margin-bottom: 25px;
+}
+.publication-section h2:first-of-type {
+     margin-top: 0;
+}
+
+h3.year-heading {
+    font-size: 1.3em;
+    margin-top: 30px;
+    margin-bottom: 20px;
+    color: var(--secondary-color);
+    border-bottom: 1px dashed var(--border-color);
+    padding-bottom: 5px;
+}
+
+/* Publication List Styling */
+ul.publication-list {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 25px;
+}
+
+ul.publication-list li {
+    margin-bottom: 18px;
+    padding-left: 1.8em;
+    position: relative;
+    line-height: 1.6;
+}
+
+ul.publication-list li::before {
+    content: "▪"; /* Square bullet */
+    position: absolute;
+    left: 0;
+    top: 0.1em;
+    color: var(--secondary-color);
+    font-size: 1.1em;
+}
+
+ul.publication-list li em,
+ul.publication-list li i {
+    font-style: italic;
+    color: #555;
+}
+
+ul.publication-list li strong,
+ul.publication-list li b {
+    font-weight: bold;
+}
+
+/* =========================================
+   CV Page Specific Styles
+   ========================================= */
+.cv-container {
+    text-align: center;
+    margin-top: 20px; /* Add space above download link */
+    margin-bottom: 20px;
+}
+
+.cv-container p { /* Style for download link paragraph */
+    margin-bottom: 20px;
+}
+
+.cv-iframe {
+    width: 100%;
+    max-width: 850px;
+    height: 1000px; /* Default height */
+    border: 1px solid var(--border-color);
+    margin: 0 auto;
+    display: block;
+}
+
+
+/* =========================================
+   Footer
+   ========================================= */
+footer {
+    text-align: center;
+    margin-top: 50px;
+    padding: 25px;
+    font-size: 0.9em;
+    color: var(--light-text);
+    background-color: var(--footer-bg);
+}
+
+/* =========================================
+   Responsive Design Adjustments
+   ========================================= */
+@media (max-width: 768px) {
+    nav {
+        padding: 10px;
+    }
+     nav ul li {
+        margin: 5px 10px;
+    }
+    .page-title h1 {
+        font-size: 2em;
+    }
+    main {
+        padding: 30px 25px;
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+    .content-wrapper {
+        flex-direction: column;
+    }
+    .bio-image {
+        margin-top: 30px;
+        max-width: 250px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .publications-content, .research-content {
+         padding: 0;
+    }
+    .cv-iframe {
+        height: 800px; /* Adjust iframe height for tablets */
+    }
+}
+
+@media (max-width: 480px) {
+    body { line-height: 1.6; }
+    .site-title a { font-size: 1.3em; }
+    nav ul li a { font-size: 0.9em; }
+    .page-title h1 { font-size: 1.8em; }
+    main { padding: 20px 15px; }
+    main h2 { font-size: 1.5em; }
+    main h3 { font-size: 1.2em; }
+    ul.publication-list li { padding-left: 1.5em; }
+    ul.publication-list li::before { font-size: 1em; }
+    .cv-iframe {
+        height: 600px; /* Adjust iframe height for phones */
+        max-width: 100%;
+    }
+}
