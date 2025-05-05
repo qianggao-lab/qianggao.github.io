@@ -74,15 +74,39 @@ header {
     /* Background applied via body.homepage or default body bg */
 }
 
+/* nav { */
+    /* display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 5px 20px;
+    background-color: rgba(13, 71, 161, 0.8); Dark Blue Nav Background - Adjust opacity */
+    /* border-radius: 5px; */
+/* } */
+
 nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 5px 20px;
-    background-color: rgba(13, 71, 161, 0.8); /* Dark Blue Nav Background - Adjust opacity */
-    border-radius: 5px;
+    padding: 10px 25px; /* Slightly more padding for glass effect */
+
+    /* Glassmorphism Styling */
+    background-color: rgba(255, 255, 255, 0.15); /* Very transparent white */
+    backdrop-filter: blur(10px); /* Adjust blur amount (e.g., 5px, 15px) */
+    -webkit-backdrop-filter: blur(10px); /* Safari prefix */
+    border-radius: 8px; /* Slightly larger radius */
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle white border */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Optional subtle shadow */
+
+     /* --- Added for Sticky Header --- */
+     position: -webkit-sticky; /* Safari */
+     position: sticky;
+     top: 0; /* Stick to the top */
+     z-index: 1000; /* Stay on top of other content */
+     /* ----------------------------- */
 }
 
 .site-title a {
@@ -137,7 +161,7 @@ nav ul li a:hover {
     margin-bottom: 40px;
 }
 
-.page-title h1 {
+/* .page-title h1 {
     margin: 0;
     font-family: var(--font-heading);
     font-size: 3em;
@@ -147,24 +171,66 @@ nav ul li a:hover {
     padding: 10px 25px;
     border-radius: 5px;
     color: var(--light-text);
+} */
+
+/* In style.css */
+
+.page-title h1 {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: 3em;
+    font-weight: 700;
+    display: inline-block;
+    padding: 15px 30px; /* Slightly increased padding */
+    border-radius: 8px; /* Match other elements */
+
+    /* Glassmorphism Styling for Title Background */
+    background-color: rgba(255, 255, 255, 0.15); /* Transparent white - adjust alpha */
+    backdrop-filter: blur(5px); /* Subtle blur - adjust as needed */
+    -webkit-backdrop-filter: blur(5px); /* Safari prefix */
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle white border */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Optional subtle shadow */
+
+    /* IMPORTANT: Change text color for readability on light background */
+    color: var(--primary-color); /* Example: Use dark blue text */
+    /* Or use: color: var(--dark-text); */
 }
 
 /* =========================================
    Main Content Area (Card Styling)
    ========================================= */
-main {
-    max-width: 1000px;
+/* main { */
+    /* max-width: 1000px;
     margin: 40px auto;
-    padding: 40px 50px;
+    padding: 40px 50px; */
     /* background-color: var(--content-bg); */
-    background-color: rgba(255, 255, 255, 0.85); /* 85% opaque white */
-    border-radius: 8px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    /* background-color: rgba(255, 255, 255, 0.85); 85% opaque white */
+    /* border-radius: 8px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1); */
     /* min-height: 400px; /* <-- You might not need min-height anymore */
 
     /* Added style for sticky footer */
     /* flex-grow: 1; Tells main to take up available space */
     /* OR use shorthand: flex: 1; */
+/* } */
+
+main {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 40px 50px;
+    border-radius: 10px; /* Slightly larger radius */
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1); /* Keep existing shadow */
+
+    /* Glassmorphism Styling */
+    /* Adjust alpha (0.25) and blur (15px) carefully for readability! */
+    background-color: rgba(255, 255, 255, 0.25); /* Example: 25% opaque white */
+    backdrop-filter: blur(15px); /* More blur for main content? Adjust as needed */
+    -webkit-backdrop-filter: blur(15px); /* Safari prefix */
+    border: 1px solid rgba(255, 255, 255, 0.15); /* Subtle white border */
+
+    /* Sticky footer */
+    flex-grow: 1; /* Assuming you reverted to Flexbox sticky footer */
+    /* If using Grid sticky footer, this line isn't needed */
 }
 
 /* General Headings and Paragraphs in Main */
@@ -248,7 +314,7 @@ main p {
 }
 
 /* Scholar Snippet Box */
-.scholar-snippet {
+/* .scholar-snippet {
     background-color: var(--light-bg);
     border: 1px solid var(--border-color);
     padding: 20px;
@@ -265,6 +331,41 @@ main p {
 .scholar-snippet a {
     font-weight: bold;
     color: var(--primary-color);
+}
+.scholar-snippet a:hover {
+    color: var(--accent-color);
+} */
+
+/* In style.css */
+
+/* Scholar Snippet Box */
+.scholar-snippet {
+    /* Glassmorphism Styling for Snippet */
+    background-color: rgba(255, 255, 255, 0.35); /* Semi-transparent white - Adjust alpha (0.35) as needed */
+    border: 1px solid rgba(255, 255, 255, 0.3);  /* Semi-transparent white border */
+    /* backdrop-filter: blur(5px); */ /* Optional: Usually not needed/desired for nested elements */
+    /* -webkit-backdrop-filter: blur(5px); */
+
+    /* Existing styles */
+    padding: 20px;
+    margin-bottom: 40px;
+    border-radius: 6px;
+    font-size: 0.95em;
+    line-height: 1.6;
+    /* Consider adding a subtle shadow if desired */
+    /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); */
+}
+
+/* Keep existing styles for text/links inside the snippet */
+.scholar-snippet p {
+    margin: 0;
+    /* Ensure text color has enough contrast */
+    color: var(--dark-text); /* Should be okay on light background */
+}
+
+.scholar-snippet a {
+    font-weight: bold;
+    color: var(--primary-color); /* Adjust if needed for contrast */
 }
 .scholar-snippet a:hover {
     color: var(--accent-color);
@@ -350,13 +451,29 @@ ul.publication-list li b {
 /* =========================================
    Footer
    ========================================= */
-footer {
+/* footer {
     text-align: center;
     margin-top: 50px;
     padding: 25px;
     font-size: 0.9em;
     color: var(--light-text);
     background-color: var(--footer-bg);
+} */
+
+footer {
+    text-align: center;
+    margin-top: 50px; /* Keep existing margin */
+    padding: 25px; /* Keep existing padding */
+    font-size: 0.9em;
+    color: var(--light-text); /* Keep light text */
+
+    /* Glassmorphism Styling for Footer */
+    background-color: rgba(0, 0, 0, 0.2); /* Example: 20% opaque black/dark grey */
+    /* Alternative: Use a transparent version of primary color: rgba(13, 71, 161, 0.3); */
+    backdrop-filter: blur(10px);       /* Adjust blur amount */
+    -webkit-backdrop-filter: blur(10px); /* Safari prefix */
+    border-top: 1px solid rgba(255, 255, 255, 0.2); /* Subtle white top border */
+    /* Remove background-color: var(--footer-bg); if using rgba directly */
 }
 
 /* =========================================
