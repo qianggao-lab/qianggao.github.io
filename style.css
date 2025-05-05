@@ -228,8 +228,11 @@ main {
     -webkit-backdrop-filter: blur(15px); /* Safari prefix */
     border: 1px solid rgba(255, 255, 255, 0.15); /* Subtle white border */
 
+    position: relative; /* Needed for z-index to work reliably */
+    z-index: 1;         /* Set a lower z-index than the nav's 1000 */
+
     /* Sticky footer */
-    flex-grow: 1; /* Assuming you reverted to Flexbox sticky footer */
+    /* flex-grow: 1; Assuming you reverted to Flexbox sticky footer */
     /* If using Grid sticky footer, this line isn't needed */
 }
 
@@ -474,6 +477,7 @@ footer {
     -webkit-backdrop-filter: blur(10px); /* Safari prefix */
     border-top: 1px solid rgba(255, 255, 255, 0.2); /* Subtle white top border */
     /* Remove background-color: var(--footer-bg); if using rgba directly */
+
 }
 
 /* =========================================
@@ -594,4 +598,23 @@ main.cv-page-main {
     /* You can keep top/bottom padding or adjust too */
     padding-top: 40px;
     padding-bottom: 40px;
+}
+
+.back-link {
+    display: inline-block; /* Allows padding and margins */
+    padding: 8px 15px;
+    margin-top: 15px; /* Add some space above */
+    border: 1px solid var(--border-color); /* Use existing border color */
+    border-radius: 5px; /* Rounded corners */
+    background-color: var(--light-bg); /* Light background */
+    color: var(--secondary-color); /* Use secondary text color */
+    text-decoration: none; /* Remove underline */
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.back-link:hover {
+    background-color: var(--secondary-color); /* Change background on hover */
+    color: var(--light-text); /* Change text color on hover */
+    border-color: var(--secondary-color);
+    text-decoration: none; /* Ensure no underline on hover */
 }
