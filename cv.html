@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qiang Gao - CV</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .cv-container {
+            text-align: center; /* Center the download link */
+            margin-bottom: 20px;
+        }
+        .cv-iframe {
+            width: 100%;
+            max-width: 850px; /* Adjust max-width as desired */
+            height: 1000px; /* Adjust height as needed, or use viewport height units */
+            border: 1px solid var(--border-color, #ccc); /* Use variable or default */
+            margin: 0 auto; /* Center the iframe */
+            display: block;
+        }
+        /* Responsive height adjustments */
+        @media (max-width: 768px) {
+            .cv-iframe {
+                height: 800px;
+            }
+        }
+         @media (max-width: 480px) {
+            .cv-iframe {
+                height: 600px;
+                max-width: 100%; /* Allow full width on small screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="site-title">
+                <a href="index.html">Qiang Gao</a>
+            </div>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="research.html">Research</a></li>
+                <li><a href="publications.html">Publications</a></li>
+                <li><a href="cv.html" class="active">CV</a></li>
+                <li><a href="#">Gallery</a></li> 
+                <!-- <li><a href="#">&#x1F50D;</a></li> </ul> -->
+        </nav>
+        </header>
+
+    <main>
+        <h2>Curriculum Vitae</h2>
+
+        <div class="cv-container">
+            <p><a href="/assets/qiang_gao_cv.pdf" target="_blank" rel="noopener noreferrer" download>Download CV (PDF)</a></p>
+
+            <iframe class="cv-iframe" src="/assets/qiang_gao_cv.pdf" title="Qiang Gao CV PDF">
+                <p>Your browser does not support embedded PDFs. Please <a href="/assets/qiang_gao_cv.pdf" target="_blank" rel="noopener noreferrer">download the PDF</a> to view it.</p>
+            </iframe>
+        </div>
+    </main>
+
+    <footer>
+        <p>Contact: qianggao@fas.harvard.edu</p>
+    </footer>
+
+</body>
+</html>
