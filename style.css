@@ -29,6 +29,15 @@
     color: var(--dark-text);
     /* background-color: var(--light-bg); */ /* <-- REMOVE or comment out this line */
 
+    /* Added styles for sticky footer */
+    /* display: flex; */
+    /* flex-direction: column; */
+    /* min-height: 100vh; */
+
+    /* min-height: 100vh;
+    display: grid;               /* <<< KEEP this */
+    /* grid-template-rows: auto 1fr auto; <<< KEEP this */
+
     /* Background Image Properties MOVED HERE - ADJUST PATH if needed */
     background-image: url('images/banner-background.jpg');
     background-size: cover;
@@ -151,7 +160,11 @@ main {
     background-color: rgba(255, 255, 255, 0.85); /* 85% opaque white */
     border-radius: 8px;
     box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-    min-height: 400px;
+    /* min-height: 400px; /* <-- You might not need min-height anymore */
+
+    /* Added style for sticky footer */
+    /* flex-grow: 1; Tells main to take up available space */
+    /* OR use shorthand: flex: 1; */
 }
 
 /* General Headings and Paragraphs in Main */
@@ -326,7 +339,7 @@ ul.publication-list li b {
 
 .cv-iframe {
     width: 100%;
-    max-width: 850px;
+    /* max-width: 850px; */
     height: 1000px; /* Default height */
     border: 1px solid var(--border-color);
     margin: 0 auto;
@@ -454,4 +467,14 @@ footer {
     text-align: center;
     color: #555;
     background-color: var(--light-bg); /* Ensure caption has background */
+}
+
+/* Reduce padding specifically on CV page main content */
+main.cv-page-main {
+    /* Adjust these padding values as needed */
+    padding-left: 20px;
+    padding-right: 20px;
+    /* You can keep top/bottom padding or adjust too */
+    padding-top: 40px;
+    padding-bottom: 40px;
 }
