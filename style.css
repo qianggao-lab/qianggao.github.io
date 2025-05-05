@@ -110,6 +110,10 @@ nav {
 }
 
 .site-title a {
+    /* Use Flexbox to align logo and text */
+    display: inline-flex; /* Changed from default inline */
+    align-items: center;  /* Vertically align items in the middle */
+
     color: var(--light-text);
     text-decoration: none;
     font-family: var(--font-heading);
@@ -119,6 +123,14 @@ nav {
 .site-title a:hover {
     text-decoration: none;
     color: var(--light-text);
+}
+
+/* Style the logo image itself */
+.site-logo {
+    height: 1.5em;     /* Adjust height relative to font size (e.g., 1.2em, 1.5em) */
+    width: auto;       /* Maintain aspect ratio */
+    margin-right: 0.5em; /* Add space between logo and name */
+    /* vertical-align: middle; */ /* Alternative/fallback alignment, but flexbox is better */
 }
 
 
