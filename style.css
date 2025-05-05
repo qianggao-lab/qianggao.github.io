@@ -396,3 +396,62 @@ footer {
         max-width: 100%;
     }
 }
+
+/* =========================================
+   Gallery Page Specific Styles
+   ========================================= */
+
+   .gallery-content {
+    padding: 10px 0; /* Adjust padding if needed */
+}
+
+.gallery-content h2 {
+    margin-top: 30px; /* Space above section title */
+    margin-bottom: 20px;
+    text-align: center; /* Center the section title */
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+}
+.gallery-content h2:first-of-type {
+     margin-top: 0;
+}
+
+.image-grid {
+    display: grid;
+    /* Creates responsive columns: minimum 250px wide, max 1 fraction of space */
+    /* Adjust 250px to control minimum item width / number of columns */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px; /* Space between grid items */
+    margin-top: 20px;
+}
+
+.image-grid figure {
+    margin: 0; /* Remove default figure margin */
+    border: 1px solid var(--border-color);
+    border-radius: 6px; /* Slightly rounded corners for the figure */
+    overflow: hidden; /* Keeps image corners rounded */
+    background-color: var(--light-bg); /* Light background for figure */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.image-grid figure:hover {
+    transform: translateY(-5px); /* Slight lift on hover */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.image-grid img {
+    display: block; /* Remove extra space below image */
+    width: 100%; /* Make image fill figure width */
+    height: auto; /* Maintain aspect ratio */
+    aspect-ratio: 1 / 1; /* Force square aspect ratio - REMOVE if images are not square */
+    object-fit: cover; /* Cover the area, cropping if needed - use 'contain' if you want to see the whole image */
+}
+
+.image-grid figcaption {
+    padding: 10px;
+    font-size: 0.9em;
+    text-align: center;
+    color: #555;
+    background-color: var(--light-bg); /* Ensure caption has background */
+}

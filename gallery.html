@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qiang Gao - Gallery</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+
+    <meta name="view-transition" content="same-origin">
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" />
+</head>
+<body> <header>
+        <nav>
+            <div class="site-title">
+                <a href="index.html">Qiang Gao</a>
+            </div>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="research.html">Research</a></li>
+                <li><a href="publications.html">Publications</a></li>
+                <li><a href="cv.html">CV</a></li>
+                <li><a href="gallery.html" class="active">Gallery</a></li>
+                <!-- <li><a href="#">&#x1F50D;</a></li> </ul> -->
+        </nav>
+        <div class="page-title">
+            <h1>Gallery</h1>
+        </div>
+    </header>
+
+    <main>
+        <div class="gallery-content">
+            <h2>Time at UT</h2>
+            <div class="image-grid">
+                <figure>
+                    <a href="images/UT_TOWER_2.jpeg"  /* <-- Link to LARGE image */
+                       class="glightbox"
+                       data-gallery="ut-gallery"
+                       data-description="UT Tower - View from the fountain"> 
+                        <img src="images/UT_TOWER_2.jpeg" /* <-- Thumbnail image */
+                             alt="UT Austin Tower with fountain">
+                    </a>
+                    <figcaption>UT Tower</figcaption>
+                </figure>
+
+                <figure>
+                    <a href="images/UT_TOWER_1.jpeg"  /* <-- Link to LARGE image */
+                       class="glightbox"
+                       data-gallery="ut-gallery"
+                       data-description="UT Tower - View from the fountain"> 
+                        <img src="images/UT_TOWER_1.jpeg" /* <-- Thumbnail image */
+                             alt="UT Austin Tower closer view">
+                    </a>
+                    <figcaption>UT Tower (closer)</figcaption>
+                </figure>       
+
+            </div> </div> </main>
+
+    <footer>
+        <p>Contact: qianggao@fas.harvard.edu</p>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/gh/mcstudios/glightbox/dist/js/glightbox.min.js"></script>
+    <script>
+        const lightbox = GLightbox({
+            selector: '.glightbox', // Tells GLightbox to look for links with class="glightbox"
+            touchNavigation: true, // Enable swipe navigation on touch devices
+            loop: true, // Allows looping back to the beginning of the gallery
+            // You can add more configuration options here if needed
+            // See GLightbox documentation: https://glightbox.mcstudios.com.tr/
+             descriptionSource: 'data-description' // Use data-description for captions
+        });
+    </script>
+</body>
+</html>
