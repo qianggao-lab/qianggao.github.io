@@ -95,8 +95,8 @@ nav {
 
     /* Glassmorphism Styling */
     background-color: rgba(255, 255, 255, 0.15); /* Very transparent white */
-    backdrop-filter: blur(10px); /* Adjust blur amount (e.g., 5px, 15px) */
-    -webkit-backdrop-filter: blur(10px); /* Safari prefix */
+    backdrop-filter: blur(15px); /* Adjust blur amount (e.g., 5px, 15px) */
+    -webkit-backdrop-filter: blur(15px); /* Safari prefix */
     border-radius: 8px; /* Slightly larger radius */
     border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle white border */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Optional subtle shadow */
@@ -198,8 +198,8 @@ nav ul li a:hover {
 
     /* Glassmorphism Styling for Title Background */
     background-color: rgba(255, 255, 255, 0.15); /* Transparent white - adjust alpha */
-    backdrop-filter: blur(5px); /* Subtle blur - adjust as needed */
-    -webkit-backdrop-filter: blur(5px); /* Safari prefix */
+    backdrop-filter: blur(10px); /* Subtle blur - adjust as needed */
+    -webkit-backdrop-filter: blur(10px); /* Safari prefix */
     border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle white border */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Optional subtle shadow */
 
@@ -236,8 +236,8 @@ main {
     /* Glassmorphism Styling */
     /* Adjust alpha (0.25) and blur (15px) carefully for readability! */
     background-color: rgba(255, 255, 255, 0.25); /* Example: 25% opaque white */
-    backdrop-filter: blur(15px); /* More blur for main content? Adjust as needed */
-    -webkit-backdrop-filter: blur(15px); /* Safari prefix */
+    backdrop-filter: blur(20px); /* More blur for main content? Adjust as needed */
+    -webkit-backdrop-filter: blur(20px); /* Safari prefix */
     border: 1px solid rgba(255, 255, 255, 0.15); /* Subtle white border */
 
     position: relative; /* Needed for z-index to work reliably */
