@@ -2,15 +2,15 @@
    CSS Variables (Color Palette & Fonts)
    ========================================= */
 :root {
-  --primary-color: #0d47a1;    /* Dark Blue */
-  --secondary-color: #1976d2;  /* Medium Blue */
+  --primary-color: #083f93;    /* Dark Blue */
+  --secondary-color: #0a64be;  /* Medium Blue */
   --accent-color: #f57c00;     /* Orange/Amber */
-  --light-bg: #f8f9fa;         /* Very Light Grey */
+  --light-bg: #afb4b9;         /* Very Light Grey */
   --content-bg: #ffffff;       /* White */
-  --dark-text: #212529;         /* Near Black */
+  --dark-text: #000000;         /* Near Black */
   --light-text: #ffffff;       /* White */
   --border-color: #dee2e6;     /* Light Grey */
-  --footer-bg: rgba(13, 71, 161, 0.85); /* Dark blue footer, slightly transparent */
+  --footer-bg: rgba(13, 71, 161, 1); /* Dark blue footer, slightly transparent */
 
   --font-body: 'Lato', sans-serif;
   --font-heading: 'Montserrat', sans-serif;
@@ -27,7 +27,7 @@
     font-family: var(--font-body);
     line-height: 1.7;
     color: var(--dark-text);
-    /* background-color: var(--light-bg); */ /* <-- REMOVE or comment out this line */
+    background-color: var(--light-bg); 
 
     /* Added styles for sticky footer */
     /* display: flex; */
@@ -432,7 +432,7 @@ ul.publication-list li::before {
 ul.publication-list li em,
 ul.publication-list li i {
     font-style: italic;
-    color: #555;
+    color: #ffffff;
 }
 
 ul.publication-list li strong,
