@@ -39,7 +39,7 @@
     /* grid-template-rows: auto 1fr auto; <<< KEEP this */
 
     /* Background Image Properties MOVED HERE - ADJUST PATH if needed */
-    background-image: url('images/banner-background.jpg');
+    background-image: url('images/banner-background.png');
     background-size: cover;
     background-position: center center;
     background-repeat: no-repeat;
