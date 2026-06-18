@@ -113,4 +113,138 @@
       else if (e.key === "ArrowRight") show(index + 1);
     });
   }
+
+  /* ---- Cursor-reactive particle web -------------------------------- */
+  /* A field of drifting points connected by lines. They lean toward the
+     cursor ("chasing" it) and link up to it when it's near. Colour is
+     pulled from the live --accent token so it tracks the theme. */
+  var webCanvas = document.getElementById("bg-web");
+  var reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (webCanvas && webCanvas.getContext && !reduceMotion) {
+    var ctx = webCanvas.getContext("2d");
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var points = [];
+    var w = 0, h = 0;
+    var LINK = 130;          // max distance to draw a link between points
+    var MOUSE_R = 200;       // cursor influence / link radius
+    var pointer = { x: -9999, y: -9999, active: false };
+
+    function accentRGB() {
+      var v = getComputedStyle(root).getPropertyValue("--accent").trim();
+      var m = v.match(/^#?([0-9a-f]{6})$/i);
+      if (m) {
+        var n = parseInt(m[1], 16);
+        return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+      }
+      var p = v.match(/(\d+)[,\s]+(\d+)[,\s]+(\d+)/);
+      return p ? [+p[1], +p[2], +p[3]] : [110, 130, 200];
+    }
+    var rgb = accentRGB();
+
+    function resize() {
+      w = webCanvas.clientWidth;
+      h = webCanvas.clientHeight;
+      webCanvas.width = Math.round(w * dpr);
+      webCanvas.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      var target = Math.round((w * h) / 16000); // density by area
+      target = Math.max(30, Math.min(target, 110));
+      while (points.length < target) {
+        points.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          vx: (Math.random() - 0.5) * 0.4,
+          vy: (Math.random() - 0.5) * 0.4
+        });
+      }
+      points.length = target;
+    }
+
+    function step() {
+      ctx.clearRect(0, 0, w, h);
+      var base = "rgba(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ",";
+
+      for (var i = 0; i < points.length; i++) {
+        var p = points[i];
+
+        // gentle pull toward the cursor when it's within range
+        if (pointer.active) {
+          var dxm = pointer.x - p.x, dym = pointer.y - p.y;
+          var dm = Math.hypot(dxm, dym);
+          if (dm < MOUSE_R && dm > 0.01) {
+            var pull = (1 - dm / MOUSE_R) * 0.06;
+            p.vx += (dxm / dm) * pull;
+            p.vy += (dym / dm) * pull;
+          }
+        }
+
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vx *= 0.99;           // light damping so they don't run away
+        p.vy *= 0.99;
+
+        // wrap around the edges
+        if (p.x < 0) p.x += w; else if (p.x > w) p.x -= w;
+        if (p.y < 0) p.y += h; else if (p.y > h) p.y -= h;
+
+        // link to nearby points
+        for (var j = i + 1; j < points.length; j++) {
+          var q = points[j];
+          var dx = p.x - q.x, dy = p.y - q.y;
+          var d = Math.hypot(dx, dy);
+          if (d < LINK) {
+            ctx.strokeStyle = base + (0.18 * (1 - d / LINK)).toFixed(3) + ")";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(q.x, q.y);
+            ctx.stroke();
+          }
+        }
+
+        // link to the cursor
+        if (pointer.active) {
+          var cdx = p.x - pointer.x, cdy = p.y - pointer.y;
+          var cd = Math.hypot(cdx, cdy);
+          if (cd < MOUSE_R) {
+            ctx.strokeStyle = base + (0.35 * (1 - cd / MOUSE_R)).toFixed(3) + ")";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(pointer.x, pointer.y);
+            ctx.stroke();
+          }
+        }
+
+        // the point itself
+        ctx.fillStyle = base + "0.7)";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 1.6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      requestAnimationFrame(step);
+    }
+
+    window.addEventListener("pointermove", function (e) {
+      pointer.x = e.clientX;
+      pointer.y = e.clientY;
+      pointer.active = true;
+    }, { passive: true });
+    window.addEventListener("pointerleave", function () { pointer.active = false; });
+    window.addEventListener("blur", function () { pointer.active = false; });
+
+    var resizeTimer;
+    window.addEventListener("resize", function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(resize, 150);
+    });
+
+    // re-read the accent colour when the theme flips
+    new MutationObserver(function () { rgb = accentRGB(); })
+      .observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+
+    resize();
+    requestAnimationFrame(step);
+  }
 })();
