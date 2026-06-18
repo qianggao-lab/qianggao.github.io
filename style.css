@@ -483,6 +483,14 @@ html[data-theme="dark"] .theme-toggle .icon-moon { display: block; }
 .pub-summary .stat b { font-family: var(--font-display); font-size: 1.5rem; line-height: 1; color: var(--ink); }
 .pub-summary .stat span { font-size: 0.82rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
 .pub-summary .grow { margin-left: auto; }
+.pub-summary__updated {
+  flex-basis: 100%;
+  margin: 4px 0 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+.pub-summary__updated a { font-weight: 600; }
+.pub-summary .stat b { transition: opacity 0.2s ease; }
 
 .pub-group { margin-bottom: 52px; }
 .pub-group > h2 {

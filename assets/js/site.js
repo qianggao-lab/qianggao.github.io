@@ -41,6 +41,34 @@
   var yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
+  /* ---- Live Google Scholar metrics --------------------------------- */
+  /* Reads assets/data/scholar.json (refreshed daily by a GitHub Action).
+     On any failure the static fallback values already in the HTML remain. */
+  var scholarBox = document.getElementById("scholar-stats");
+  if (scholarBox) {
+    var src = scholarBox.getAttribute("data-scholar");
+    fetch(src, { cache: "no-store" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d) return;
+        function set(id, val) {
+          var el = document.getElementById(id);
+          if (el && (typeof val === "number")) el.textContent = val.toLocaleString();
+        }
+        set("gs-citedby", d.citedby);
+        set("gs-hindex", d.hindex);
+        set("gs-i10", d.i10index);
+        var upd = document.getElementById("gs-updated");
+        if (upd && d.updated) {
+          var dt = new Date(d.updated + "T00:00:00Z");
+          upd.textContent = isNaN(dt.getTime())
+            ? d.updated
+            : dt.toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+        }
+      })
+      .catch(function () { /* keep static fallback values */ });
+  }
+
   /* ---- Gallery lightbox -------------------------------------------- */
   var box = document.getElementById("lightbox");
   if (box) {

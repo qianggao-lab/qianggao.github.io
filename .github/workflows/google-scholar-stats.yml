@@ -1,0 +1,42 @@
+name: Update Google Scholar metrics
+
+# Refreshes assets/data/scholar.json from the Google Scholar profile.
+# Runs once a day and on demand. Commits only when the numbers actually change.
+
+on:
+  schedule:
+    - cron: "0 8 * * *" # daily at 08:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+# Avoid overlapping runs.
+concurrency:
+  group: scholar-metrics
+  cancel-in-progress: false
+
+jobs:
+  scholar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch citation metrics
+        run: python .github/scripts/fetch_scholar.py
+
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- assets/data/scholar.json; then
+            echo "No change in scholar.json; nothing to commit."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add assets/data/scholar.json
+            git commit -m "chore: update Google Scholar metrics"
+            git push
+          fi
