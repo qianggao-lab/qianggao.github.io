@@ -525,4 +525,220 @@
     resize();
     requestAnimationFrame(frame);
   }
+
+  /* ---- Site search (command-palette overlay) ----------------------- */
+  /* Injects a search button into the nav and a search overlay into the body
+     on every page. The index is built lazily on first open by fetching the
+     site's pages (same-origin) and extracting their text, so it never goes
+     stale when content changes and needs no per-page markup. */
+  (function initSearch() {
+    var navMenu = document.querySelector(".nav__menu");
+    if (!navMenu || !window.fetch || !window.DOMParser) return;
+
+    // Resolve the site root from the brand link so URLs work from any page
+    // (root or notes/) and under any GitHub Pages base path.
+    var brand = document.querySelector(".brand");
+    var base = brand ? brand.href.replace(/index\.html?(\?[^#]*)?(#.*)?$/, "") : "";
+    if (base && !/\/$/.test(base)) base += "/";
+
+    var PAGES = [
+      { url: "index.html", label: "Home" },
+      { url: "research.html", label: "Research" },
+      { url: "publications.html", label: "Publications" },
+      { url: "cv.html", label: "CV" },
+      { url: "notes.html", label: "Notes" },
+      { url: "gallery.html", label: "Gallery" },
+      { url: "notes/bootstrapQH.html", label: "Notes · Bootstrapping the QH problem" },
+      { url: "notes/other.html", label: "Notes · Other" }
+    ];
+
+    var ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>';
+
+    // Nav button.
+    var li = document.createElement("li");
+    li.className = "nav__search";
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "search-toggle";
+    btn.setAttribute("aria-label", "Search this site");
+    btn.setAttribute("aria-haspopup", "dialog");
+    btn.innerHTML = ICON + '<span class="search-toggle__label">Search</span>';
+    li.appendChild(btn);
+    navMenu.insertBefore(li, navMenu.querySelector(".nav__theme"));
+
+    // Overlay.
+    var overlay = document.createElement("div");
+    overlay.className = "search";
+    overlay.id = "site-search";
+    overlay.hidden = true;
+    overlay.innerHTML =
+      '<div class="search__backdrop" data-close></div>' +
+      '<div class="search__panel" role="dialog" aria-modal="true" aria-label="Search this site">' +
+        '<div class="search__bar">' + ICON +
+          '<input type="search" class="search__input" placeholder="Search this site…" aria-label="Search this site" aria-controls="search-results" autocomplete="off" spellcheck="false">' +
+          '<kbd class="search__esc">Esc</kbd>' +
+        '</div>' +
+        '<ul class="search__results" id="search-results" role="listbox" aria-label="Search results"></ul>' +
+        '<p class="search__empty" hidden>No matches found.</p>' +
+        '<p class="search__hint">Type to search · <kbd>↑</kbd> <kbd>↓</kbd> to navigate · <kbd>↵</kbd> to open</p>' +
+      '</div>';
+    document.body.appendChild(overlay);
+
+    var input = overlay.querySelector(".search__input");
+    var resultsEl = overlay.querySelector(".search__results");
+    var emptyEl = overlay.querySelector(".search__empty");
+    var hintEl = overlay.querySelector(".search__hint");
+
+    var index = null, building = null, results = [], active = -1, lastFocus = null;
+
+    function esc(s) {
+      return s.replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+    function reEsc(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+
+    function buildIndex() {
+      if (index) return Promise.resolve();
+      if (building) return building;
+      building = Promise.all(PAGES.map(function (pg) {
+        return fetch(base + pg.url, { credentials: "same-origin" })
+          .then(function (r) { return r.ok ? r.text() : ""; })
+          .then(function (html) {
+            if (!html) return [];
+            var doc = new DOMParser().parseFromString(html, "text/html");
+            var main = doc.querySelector("main") || doc.body;
+            var recs = [];
+            main.querySelectorAll("h1, h2, h3, h4, p, li, figcaption").forEach(function (el) {
+              if (el.querySelector("ul, ol")) return; // skip list wrappers; index leaf items
+              var text = (el.textContent || "").replace(/\s+/g, " ").trim();
+              if (text.length >= 3) recs.push({ url: pg.url, page: pg.label, text: text });
+            });
+            return recs;
+          })
+          .catch(function () { return []; });
+      })).then(function (chunks) {
+        index = [];
+        var seen = {};
+        chunks.forEach(function (arr) {
+          arr.forEach(function (r) {
+            var key = r.url + "|" + r.text;
+            if (!seen[key]) { seen[key] = 1; index.push(r); }
+          });
+        });
+      });
+      return building;
+    }
+
+    function score(rec, terms, q) {
+      var t = rec.text.toLowerCase();
+      var hay = rec.page.toLowerCase() + " " + t;
+      for (var i = 0; i < terms.length; i++) if (hay.indexOf(terms[i]) === -1) return 0;
+      var s = 0;
+      if (t.indexOf(q) !== -1) s += 50;
+      if (rec.page.toLowerCase().indexOf(q) !== -1) s += 18;
+      terms.forEach(function (term) {
+        var idx = t.indexOf(term);
+        if (idx !== -1) { s += 10; if (idx === 0 || /\W/.test(t.charAt(idx - 1))) s += 5; }
+      });
+      return s - Math.min(rec.text.length / 220, 5); // prefer concise blocks
+    }
+
+    function snippet(text, terms) {
+      var low = text.toLowerCase(), pos = -1;
+      terms.forEach(function (term) {
+        var i = low.indexOf(term);
+        if (i !== -1 && (pos === -1 || i < pos)) pos = i;
+      });
+      if (pos < 0) pos = 0;
+      var start = Math.max(0, pos - 50), end = Math.min(text.length, Math.max(pos, start) + 160);
+      var frag = (start > 0 ? "… " : "") + text.slice(start, end) + (end < text.length ? " …" : "");
+      var html = esc(frag);
+      terms.forEach(function (term) {
+        if (term) html = html.replace(new RegExp("(" + reEsc(esc(term)) + ")", "ig"), "<mark>$1</mark>");
+      });
+      return html;
+    }
+
+    function render(q) {
+      q = (q || "").trim().toLowerCase();
+      results = []; active = -1;
+      if (!q) { resultsEl.innerHTML = ""; emptyEl.hidden = true; return; }
+      var terms = q.split(/\s+/).filter(Boolean);
+      var scored = [];
+      (index || []).forEach(function (rec) {
+        var sc = score(rec, terms, q);
+        if (sc > 0) scored.push({ rec: rec, sc: sc });
+      });
+      scored.sort(function (a, b) { return b.sc - a.sc; });
+      results = scored.slice(0, 12).map(function (x) { return x.rec; });
+
+      if (!results.length) {
+        resultsEl.innerHTML = "";
+        emptyEl.hidden = index ? false : true; // don't say "no matches" mid-build
+        return;
+      }
+      emptyEl.hidden = true;
+      resultsEl.innerHTML = results.map(function (r, i) {
+        return '<li role="option"><a class="search__result" href="' + base + r.url + '" data-i="' + i + '">' +
+          '<span class="r-page">' + esc(r.page) + '</span>' +
+          '<span class="r-text">' + snippet(r.text, terms) + "</span></a></li>";
+      }).join("");
+      setActive(0);
+    }
+
+    function setActive(i) {
+      var items = resultsEl.querySelectorAll(".search__result");
+      if (!items.length) { active = -1; return; }
+      active = (i + items.length) % items.length;
+      items.forEach(function (el, k) {
+        var on = k === active;
+        el.classList.toggle("is-active", on);
+        if (on) el.scrollIntoView({ block: "nearest" });
+      });
+    }
+
+    function open() {
+      lastFocus = document.activeElement;
+      overlay.hidden = false;
+      document.body.classList.add("search-open");
+      input.value = "";
+      render("");
+      input.focus();
+      navMenu.classList.remove("is-open"); // collapse mobile menu if open
+      buildIndex().then(function () { if (!overlay.hidden && input.value) render(input.value); });
+    }
+    function close() {
+      overlay.hidden = true;
+      document.body.classList.remove("search-open");
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+
+    btn.addEventListener("click", open);
+    overlay.addEventListener("click", function (e) { if (e.target.hasAttribute("data-close")) close(); });
+    resultsEl.addEventListener("mousemove", function (e) {
+      var a = e.target.closest(".search__result");
+      if (a) setActive(+a.getAttribute("data-i"));
+    });
+    input.addEventListener("input", function () { render(input.value); });
+    overlay.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") { e.preventDefault(); close(); }
+      else if (e.key === "ArrowDown") { e.preventDefault(); setActive(active + 1); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); setActive(active - 1); }
+      else if (e.key === "Enter") {
+        var items = resultsEl.querySelectorAll(".search__result");
+        if (items[active]) { e.preventDefault(); window.location.href = items[active].getAttribute("href"); }
+      }
+    });
+
+    // Global shortcuts: "/" or Cmd/Ctrl+K opens search.
+    document.addEventListener("keydown", function (e) {
+      var tag = (e.target.tagName || "").toLowerCase();
+      var typing = tag === "input" || tag === "textarea" || e.target.isContentEditable;
+      if ((e.key === "/" && !typing) || ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K"))) {
+        e.preventDefault();
+        if (overlay.hidden) open();
+      }
+    });
+  })();
 })();
