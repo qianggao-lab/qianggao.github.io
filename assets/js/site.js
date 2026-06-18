@@ -131,6 +131,19 @@
     // Home draws the gadget at full canvas opacity, so fade the web here.
     var webAlpha = home ? 0.55 : 1;
 
+    // Second canvas, layered ABOVE the UI: when only a few stars remain we pulse
+    // their light here (1 Hz) so it shines through the interface instead of being
+    // hidden beneath the header/content.
+    var topCanvas = null, tctx = null;
+    if (home) {
+      topCanvas = document.createElement("canvas");
+      topCanvas.id = "bg-web-top";
+      topCanvas.setAttribute("aria-hidden", "true");
+      document.body.appendChild(topCanvas);
+      tctx = topCanvas.getContext("2d");
+    }
+    var BLINK_AT = 6; // start blinking once this many (or fewer) stars remain
+
     var points = [];
     var w = 0, h = 0, TOTAL = null;
     var LINK = 130;          // max distance to draw a link between points
@@ -178,6 +191,12 @@
       webCanvas.width = Math.round(w * dpr);
       webCanvas.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      if (topCanvas) {
+        topCanvas.width = Math.round(w * dpr);
+        topCanvas.height = Math.round(h * dpr);
+        tctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
 
       var target = Math.round((w * h) / 16000); // density by area
       target = Math.max(30, Math.min(target, 110));
@@ -404,6 +423,30 @@
       ctx.restore();
     }
 
+    /* When few stars remain, pulse each survivor's light at 1 Hz on the
+       top-layer canvas so it shines over (not under) the UI. Warm amber keeps
+       it visible on both light and dark themes and matches the accretion disk. */
+    function drawBlinkers() {
+      tctx.clearRect(0, 0, w, h);
+      if (TOTAL === null || phase !== "idle" || (TOTAL - captured) > BLINK_AT) return;
+      // 0 -> 1 -> 0 once per second (1 Hz), driven by wall-clock time.
+      var blink = 0.5 - 0.5 * Math.cos((performance.now() / 1000) * Math.PI * 2);
+      var a = 0.14 + 0.86 * blink;       // pulsing opacity
+      var rad = 15 + 13 * blink;         // pulsing halo radius
+      for (var i = 0; i < points.length; i++) {
+        var p = points[i];
+        if (p.state !== 0) continue;     // skip points spiralling into the hole
+        var halo = tctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, rad);
+        halo.addColorStop(0, "rgba(255,184,92," + (0.72 * a).toFixed(3) + ")");
+        halo.addColorStop(0.5, "rgba(255,142,58," + (0.30 * a).toFixed(3) + ")");
+        halo.addColorStop(1, "rgba(255,120,40,0)");
+        tctx.fillStyle = halo;
+        tctx.beginPath(); tctx.arc(p.x, p.y, rad, 0, Math.PI * 2); tctx.fill();
+        tctx.fillStyle = "rgba(255,236,205," + a.toFixed(3) + ")";
+        tctx.beginPath(); tctx.arc(p.x, p.y, 2.4, 0, Math.PI * 2); tctx.fill();
+      }
+    }
+
     function draw() {
       ctx.clearRect(0, 0, w, h);
       var base = "rgba(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ",";
@@ -487,6 +530,9 @@
 
       // Live readout on top of the black hole.
       if (home) drawCounter(BH.x, BH.y);
+
+      // Survivor beacons: pulse the last few stars' light over the UI.
+      if (tctx) drawBlinkers();
     }
 
     function frame() {

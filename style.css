@@ -148,10 +148,20 @@ main { flex: 1 0 auto; }
 /* Home page also renders the black-hole gadget on this canvas, which needs
    full opacity; the web itself is faded in JS instead (see webAlpha). */
 #bg-web.bg-web--home { opacity: 1; }
+/* Survivor-beacon layer: drawn ABOVE the UI (created in JS, home page only) so
+   the last few stars' pulsing light shows through the interface. */
+#bg-web-top {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1500;
+  pointer-events: none;
+}
 main,
 .site-footer { position: relative; z-index: 1; }
 @media (prefers-reduced-motion: reduce) {
-  #bg-web { display: none; }
+  #bg-web, #bg-web-top { display: none; }
 }
 
 .section { padding-block: clamp(48px, 7vw, 84px); }
