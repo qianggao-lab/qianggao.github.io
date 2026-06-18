@@ -145,6 +145,9 @@ main { flex: 1 0 auto; }
   pointer-events: none;
   opacity: 0.55;
 }
+/* Home page also renders the black-hole gadget on this canvas, which needs
+   full opacity; the web itself is faded in JS instead (see webAlpha). */
+#bg-web.bg-web--home { opacity: 1; }
 main,
 .site-footer { position: relative; z-index: 1; }
 @media (prefers-reduced-motion: reduce) {

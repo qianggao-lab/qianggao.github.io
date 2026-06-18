@@ -114,125 +114,403 @@
     });
   }
 
-  /* ---- Cursor-reactive particle web -------------------------------- */
-  /* A field of drifting points connected by lines. They lean toward the
-     cursor ("chasing" it) and link up to it when it's near. Colour is
-     pulled from the live --accent token so it tracks the theme. */
+  /* ---- Cursor-reactive particle web + black-hole gadget ------------ */
+  /* A field of drifting points linked by lines that lean toward the cursor
+     ("chasing" it). On the home page (canvas[data-blackhole]) a small
+     Interstellar-style black hole sits bottom-right: lead or drag the web
+     into it and it devours the points with a swirling accretion animation.
+     Devour every point and a white hole blooms bottom-left, spits them all
+     back out, then fades — repeatable. Colour tracks the --accent token. */
   var webCanvas = document.getElementById("bg-web");
   var reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (webCanvas && webCanvas.getContext && !reduceMotion) {
     var ctx = webCanvas.getContext("2d");
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var home = webCanvas.hasAttribute("data-blackhole");
+    if (home) webCanvas.classList.add("bg-web--home");
+    // Home draws the gadget at full canvas opacity, so fade the web here.
+    var webAlpha = home ? 0.55 : 1;
+
     var points = [];
-    var w = 0, h = 0;
+    var w = 0, h = 0, TOTAL = null;
     var LINK = 130;          // max distance to draw a link between points
     var MOUSE_R = 200;       // cursor influence / link radius
-    var pointer = { x: -9999, y: -9999, active: false };
+    var pointer = { x: -9999, y: -9999, active: false, down: false };
 
-    function accentRGB() {
-      var v = getComputedStyle(root).getPropertyValue("--accent").trim();
+    // Black/white-hole state (home only).
+    var BH = { x: 0, y: 0 };                 // black hole, bottom-right
+    var WH = { x: 0, y: 0, on: false, alpha: 0, emit: 0, gap: 0 };
+    var INFLUENCE = 240;     // black-hole gravity reach
+    var CAPTURE = 40;        // distance at which a point starts spiralling in
+    var captured = 0;        // points devoured, not yet re-emitted
+    var phase = "idle";      // "idle" = feeding | "emit" = white hole active
+    var sparks = [];         // brief flashes where points are consumed
+    var bhPulse = 0;
+    var tick = 0;
+
+    function tokenRGB(name, fallback) {
+      var v = getComputedStyle(root).getPropertyValue(name).trim();
       var m = v.match(/^#?([0-9a-f]{6})$/i);
       if (m) {
         var n = parseInt(m[1], 16);
         return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
       }
       var p = v.match(/(\d+)[,\s]+(\d+)[,\s]+(\d+)/);
-      return p ? [+p[1], +p[2], +p[3]] : [110, 130, 200];
+      return p ? [+p[1], +p[2], +p[3]] : fallback;
     }
-    var rgb = accentRGB();
+    function readTheme() {
+      rgb = tokenRGB("--accent", [110, 130, 200]);
+      ink = tokenRGB("--ink", [27, 27, 26]);   // counter text
+      bg = tokenRGB("--bg", [250, 249, 247]);   // counter halo / legibility
+    }
+    var rgb, ink, bg;
+    readTheme();
+
+    function makePoint(x, y, vx, vy) {
+      // state 0 = free, 1 = spiralling into the black hole
+      return { x: x, y: y, vx: vx, vy: vy, state: 0, ang: 0, rad: 0, av: 0, immune: 0 };
+    }
 
     function resize() {
+      dpr = Math.min(window.devicePixelRatio || 1, 2); // re-read for DPI changes
       w = webCanvas.clientWidth;
       h = webCanvas.clientHeight;
       webCanvas.width = Math.round(w * dpr);
       webCanvas.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
       var target = Math.round((w * h) / 16000); // density by area
       target = Math.max(30, Math.min(target, 110));
-      while (points.length < target) {
-        points.push({
-          x: Math.random() * w,
-          y: Math.random() * h,
-          vx: (Math.random() - 0.5) * 0.4,
-          vy: (Math.random() - 0.5) * 0.4
-        });
+
+      if (home) {
+        // Size the field once; the game manages counts after that, so don't
+        // pad/trim on resize (it would corrupt the "all devoured" trigger).
+        if (TOTAL === null) {
+          TOTAL = target;
+          for (var i = 0; i < TOTAL; i++) {
+            points.push(makePoint(Math.random() * w, Math.random() * h,
+              (Math.random() - 0.5) * 0.4, (Math.random() - 0.5) * 0.4));
+          }
+        }
+        var m = Math.max(78, Math.min(w, h) * 0.10);
+        BH.x = w - m; BH.y = h - m;
+        WH.x = m;     WH.y = h - m;
+      } else {
+        while (points.length < target) {
+          points.push(makePoint(Math.random() * w, Math.random() * h,
+            (Math.random() - 0.5) * 0.4, (Math.random() - 0.5) * 0.4));
+        }
+        points.length = target;
       }
-      points.length = target;
     }
 
-    function step() {
+    function consume(idx) {
+      points.splice(idx, 1);
+      captured++;
+      bhPulse = 10;
+      sparks.push({ x: BH.x, y: BH.y, life: 18, max: 18 });
+    }
+
+    function update() {
+      tick++;
+      if (bhPulse > 0) bhPulse--;
+
+      // Field fully devoured -> open the white hole and spit them back out.
+      // Keyed on an empty field (not a counter) so it can't desync across
+      // cycles or fire while a point is still spiralling in.
+      if (home && phase === "idle" && captured > 0 && points.length === 0) {
+        phase = "emit";
+        WH.on = true; WH.alpha = 0; WH.emit = captured; WH.gap = 0;
+      }
+
+      // White-hole emission: stream the devoured points back into the field.
+      if (home && phase === "emit") {
+        if (WH.emit > 0) {
+          WH.alpha = Math.min(1, WH.alpha + 0.05);
+          if (--WH.gap <= 0) {
+            WH.gap = 5;            // slower cadence between ejections
+            var dir = -Math.PI / 4 + (Math.random() - 0.5) * Math.PI * 0.85; // up & into view
+            var spd = 1.3 + Math.random() * 1.3; // gentler ejection speed
+            var np = makePoint(WH.x, WH.y, Math.cos(dir) * spd, Math.sin(dir) * spd);
+            np.immune = 70;          // brief grace so it isn't re-eaten instantly
+            points.push(np);
+            WH.emit--; captured--;
+          }
+        } else {
+          WH.alpha -= 0.04;          // all out -> fade the white hole away
+          if (WH.alpha <= 0) { WH.alpha = 0; WH.on = false; phase = "idle"; }
+        }
+      }
+
+      // Physics (iterate backwards so consume()'s splice is safe).
+      for (var i = points.length - 1; i >= 0; i--) {
+        var p = points[i];
+        if (p.immune > 0) p.immune--;
+
+        if (p.state === 1) {         // spiralling into the black hole
+          p.rad *= 0.90;
+          p.av *= 1.06;
+          p.ang += p.av;
+          p.x = BH.x + Math.cos(p.ang) * p.rad;
+          p.y = BH.y + Math.sin(p.ang) * p.rad;
+          if (p.rad < 4) consume(i);
+          continue;
+        }
+
+        // Cursor: a light lead on hover, a strong grab while pressed.
+        if (pointer.active) {
+          var R = pointer.down ? 320 : MOUSE_R;
+          var dxm = pointer.x - p.x, dym = pointer.y - p.y;
+          var dm = Math.hypot(dxm, dym);
+          if (dm < R && dm > 0.01) {
+            var pull = (pointer.down ? 0.14 : 0.05) * (1 - dm / R);
+            p.vx += (dxm / dm) * pull;
+            p.vy += (dym / dm) * pull;
+            if (pointer.down) { p.vx *= 0.94; p.vy *= 0.94; }
+          }
+        }
+
+        // Black-hole gravity while feeding (skip freshly re-emitted points).
+        if (home && phase === "idle" && p.immune === 0) {
+          var gx = BH.x - p.x, gy = BH.y - p.y;
+          var gd = Math.hypot(gx, gy);
+          if (gd < CAPTURE) {
+            p.state = 1;
+            p.ang = Math.atan2(p.y - BH.y, p.x - BH.x);
+            p.rad = Math.max(gd, 6);
+            p.av = 0.18 + 0.12 * Math.random();
+            continue;
+          } else if (gd < INFLUENCE && gd > 0.01) {
+            var f = 1 - gd / INFLUENCE;
+            var g = 0.13 * f * f + 0.02;
+            p.vx += (gx / gd) * g - (gy / gd) * g * 0.6;  // inward + swirl
+            p.vy += (gy / gd) * g + (gx / gd) * g * 0.6;
+          }
+        }
+
+        p.x += p.vx; p.y += p.vy;
+        p.vx *= 0.99; p.vy *= 0.99;
+        var sp = Math.hypot(p.vx, p.vy);
+        if (sp > 6) { p.vx *= 6 / sp; p.vy *= 6 / sp; }
+
+        if (p.x < 0) p.x += w; else if (p.x > w) p.x -= w;
+        if (p.y < 0) p.y += h; else if (p.y > h) p.y -= h;
+      }
+    }
+
+    /* ---- Gadget rendering ---- */
+    function drawBlackHoleBack(cx, cy) {
+      var EH = 22, pulse = 1 + (bhPulse > 0 ? (bhPulse / 10) * 0.22 : 0);
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+      var glow = ctx.createRadialGradient(cx, cy, EH * 0.4, cx, cy, 96 * pulse);
+      glow.addColorStop(0, "rgba(255,150,60,0.45)");
+      glow.addColorStop(0.4, "rgba(255,110,40,0.18)");
+      glow.addColorStop(1, "rgba(255,90,30,0)");
+      ctx.fillStyle = glow;
+      ctx.beginPath(); ctx.arc(cx, cy, 96 * pulse, 0, Math.PI * 2); ctx.fill();
+
+      // Accretion disk: flattened, rotating, brighter on one side (beaming).
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.scale(1, 0.34);
+      var SEG = 48, R1 = EH * 1.2, R2 = EH * 2.5;
+      for (var s = 0; s < SEG; s++) {
+        var a0 = (s / SEG) * Math.PI * 2 + tick * 0.03;
+        var a1 = ((s + 1) / SEG) * Math.PI * 2 + tick * 0.03;
+        var bright = Math.pow((Math.cos(a0 - 0.7) + 1) / 2, 1.7);
+        var gch = Math.round(90 + 150 * bright);
+        var bch = Math.round(20 + 165 * bright);
+        ctx.fillStyle = "rgba(255," + gch + "," + bch + "," + (0.25 + 0.6 * bright).toFixed(3) + ")";
+        ctx.beginPath();
+        ctx.arc(0, 0, R2, a0, a1);
+        ctx.arc(0, 0, R1, a1, a0, true);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.restore();
+
+      // Lensed photon halo wrapping the hole.
+      var ring = ctx.createLinearGradient(cx - EH, cy, cx + EH, cy);
+      ring.addColorStop(0, "rgba(255,210,150,0.5)");
+      ring.addColorStop(0.5, "rgba(255,255,235,0.85)");
+      ring.addColorStop(1, "rgba(255,170,90,0.5)");
+      ctx.strokeStyle = ring;
+      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(cx, cy, EH * 1.32, 0, Math.PI * 2); ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawBlackHoleFront(cx, cy) {
+      var EH = 22;
+      var g = ctx.createRadialGradient(cx, cy, EH * 0.2, cx, cy, EH);
+      g.addColorStop(0, "rgba(0,0,0,1)");
+      g.addColorStop(0.82, "rgba(3,4,9,1)");
+      g.addColorStop(1, "rgba(12,14,22,0.15)");
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(cx, cy, EH, 0, Math.PI * 2); ctx.fill();
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+      ctx.strokeStyle = "rgba(255,240,210,0.9)";
+      ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.arc(cx, cy, EH * 1.02, 0, Math.PI * 2); ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawCounter(cx, cy) {
+      // Devoured climbs as the hole feeds; the instant the white hole opens
+      // (phase "emit") it snaps back to 0 / TOTAL while the stars stream out.
+      var devoured = (phase === "emit") ? 0 : captured;
+      var left = TOTAL - devoured;
+      ctx.save();
+      ctx.font = '600 13px "Inter", system-ui, -apple-system, sans-serif';
+      ctx.textAlign = "center";
+      ctx.textBaseline = "alphabetic";
+      ctx.shadowColor = "rgba(" + bg[0] + "," + bg[1] + "," + bg[2] + ",0.85)";
+      ctx.shadowBlur = 5;
+      ctx.fillStyle = "rgba(" + ink[0] + "," + ink[1] + "," + ink[2] + ",0.96)";
+      ctx.fillText("Stars devoured: " + devoured, cx, cy - 106);
+      ctx.fillText("Stars left: " + left, cx, cy - 88);
+      ctx.restore();
+    }
+
+    function drawWhiteHole(cx, cy, a) {
+      ctx.save();
+      ctx.globalAlpha = a;
+      ctx.globalCompositeOperation = "lighter";
+      var glow = ctx.createRadialGradient(cx, cy, 2, cx, cy, 100);
+      glow.addColorStop(0, "rgba(235,250,255,0.9)");
+      glow.addColorStop(0.35, "rgba(150,205,255,0.35)");
+      glow.addColorStop(1, "rgba(120,180,255,0)");
+      ctx.fillStyle = glow;
+      ctx.beginPath(); ctx.arc(cx, cy, 100, 0, Math.PI * 2); ctx.fill();
+      ctx.lineWidth = 2;
+      for (var s = 0; s < 12; s++) {
+        var ang = (s / 12) * Math.PI * 2 + tick * 0.02;
+        var len = 40 + 22 * Math.abs(Math.sin(tick * 0.08 + s));
+        var ex = cx + Math.cos(ang) * len, ey = cy + Math.sin(ang) * len;
+        var grd = ctx.createLinearGradient(cx, cy, ex, ey);
+        grd.addColorStop(0, "rgba(220,245,255,0.8)");
+        grd.addColorStop(1, "rgba(150,205,255,0)");
+        ctx.strokeStyle = grd;
+        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(ex, ey); ctx.stroke();
+      }
+      var core = ctx.createRadialGradient(cx, cy, 0, cx, cy, 16);
+      core.addColorStop(0, "rgba(255,255,255,1)");
+      core.addColorStop(0.6, "rgba(210,240,255,0.9)");
+      core.addColorStop(1, "rgba(150,205,255,0)");
+      ctx.fillStyle = core;
+      ctx.beginPath(); ctx.arc(cx, cy, 16, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
+
+    function draw() {
       ctx.clearRect(0, 0, w, h);
       var base = "rgba(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ",";
 
+      // Hole back-glow sits behind the web so points read as flowing over it.
+      if (home) {
+        ctx.save();
+        ctx.globalAlpha = (phase === "emit") ? 0.4 : 1;
+        drawBlackHoleBack(BH.x, BH.y);
+        ctx.restore();
+        if (WH.on) drawWhiteHole(WH.x, WH.y, WH.alpha);
+      }
+
+      // Links between nearby free points.
+      ctx.lineWidth = 1;
       for (var i = 0; i < points.length; i++) {
         var p = points[i];
-
-        // gentle pull toward the cursor when it's within range
-        if (pointer.active) {
-          var dxm = pointer.x - p.x, dym = pointer.y - p.y;
-          var dm = Math.hypot(dxm, dym);
-          if (dm < MOUSE_R && dm > 0.01) {
-            var pull = (1 - dm / MOUSE_R) * 0.06;
-            p.vx += (dxm / dm) * pull;
-            p.vy += (dym / dm) * pull;
-          }
-        }
-
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vx *= 0.99;           // light damping so they don't run away
-        p.vy *= 0.99;
-
-        // wrap around the edges
-        if (p.x < 0) p.x += w; else if (p.x > w) p.x -= w;
-        if (p.y < 0) p.y += h; else if (p.y > h) p.y -= h;
-
-        // link to nearby points
+        if (p.state === 1) continue;
         for (var j = i + 1; j < points.length; j++) {
           var q = points[j];
+          if (q.state === 1) continue;
           var dx = p.x - q.x, dy = p.y - q.y;
           var d = Math.hypot(dx, dy);
           if (d < LINK) {
-            ctx.strokeStyle = base + (0.18 * (1 - d / LINK)).toFixed(3) + ")";
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(p.x, p.y);
-            ctx.lineTo(q.x, q.y);
-            ctx.stroke();
+            ctx.strokeStyle = base + (0.18 * (1 - d / LINK) * webAlpha).toFixed(3) + ")";
+            ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
           }
         }
-
-        // link to the cursor
         if (pointer.active) {
-          var cdx = p.x - pointer.x, cdy = p.y - pointer.y;
-          var cd = Math.hypot(cdx, cdy);
+          var cd = Math.hypot(p.x - pointer.x, p.y - pointer.y);
           if (cd < MOUSE_R) {
-            ctx.strokeStyle = base + (0.35 * (1 - cd / MOUSE_R)).toFixed(3) + ")";
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(p.x, p.y);
-            ctx.lineTo(pointer.x, pointer.y);
-            ctx.stroke();
+            ctx.strokeStyle = base + (0.35 * (1 - cd / MOUSE_R) * webAlpha).toFixed(3) + ")";
+            ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(pointer.x, pointer.y); ctx.stroke();
           }
         }
-
-        // the point itself
-        ctx.fillStyle = base + "0.7)";
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 1.6, 0, Math.PI * 2);
-        ctx.fill();
       }
 
-      requestAnimationFrame(step);
+      // The points themselves.
+      for (var k = 0; k < points.length; k++) {
+        var pt = points[k];
+        if (pt.state === 1) {                       // being devoured
+          ctx.fillStyle = "rgba(255,185,95,0.95)";
+          ctx.beginPath(); ctx.arc(pt.x, pt.y, 2, 0, Math.PI * 2); ctx.fill();
+        } else if (pt.immune > 0) {                 // freshly spat out
+          var im = pt.immune / 70;
+          ctx.save();
+          ctx.globalCompositeOperation = "lighter";
+          ctx.fillStyle = "rgba(190,230,255," + (0.85 * im).toFixed(3) + ")";
+          ctx.beginPath(); ctx.arc(pt.x, pt.y, 1.6 + 2.2 * im, 0, Math.PI * 2); ctx.fill();
+          ctx.restore();
+          ctx.fillStyle = base + (0.7 * webAlpha).toFixed(3) + ")";
+          ctx.beginPath(); ctx.arc(pt.x, pt.y, 1.6, 0, Math.PI * 2); ctx.fill();
+        } else {
+          ctx.fillStyle = base + (0.7 * webAlpha).toFixed(3) + ")";
+          ctx.beginPath(); ctx.arc(pt.x, pt.y, 1.6, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+
+      // Event horizon on top, so spiralling points vanish beneath it.
+      if (home) {
+        ctx.save();
+        ctx.globalAlpha = (phase === "emit") ? 0.5 : 1;
+        drawBlackHoleFront(BH.x, BH.y);
+        ctx.restore();
+      }
+
+      // Consumption flashes.
+      if (sparks.length) {
+        ctx.save();
+        ctx.globalCompositeOperation = "lighter";
+        for (var si = sparks.length - 1; si >= 0; si--) {
+          var sk = sparks[si];
+          var t = sk.life / sk.max;                 // 1 -> 0
+          ctx.strokeStyle = "rgba(255,200,120," + (0.6 * t).toFixed(3) + ")";
+          ctx.lineWidth = 2 * t + 0.5;
+          ctx.beginPath(); ctx.arc(sk.x, sk.y, 6 + (1 - t) * 26, 0, Math.PI * 2); ctx.stroke();
+          if (--sk.life <= 0) sparks.splice(si, 1);
+        }
+        ctx.restore();
+      }
+
+      // Live readout on top of the black hole.
+      if (home) drawCounter(BH.x, BH.y);
+    }
+
+    function frame() {
+      update();
+      draw();
+      requestAnimationFrame(frame);
     }
 
     window.addEventListener("pointermove", function (e) {
-      pointer.x = e.clientX;
-      pointer.y = e.clientY;
-      pointer.active = true;
+      pointer.x = e.clientX; pointer.y = e.clientY; pointer.active = true;
+      // Self-heal a missed button release (up delivered outside the window).
+      if (pointer.down && e.buttons === 0) pointer.down = false;
     }, { passive: true });
-    window.addEventListener("pointerleave", function () { pointer.active = false; });
-    window.addEventListener("blur", function () { pointer.active = false; });
+    window.addEventListener("pointerdown", function (e) {
+      pointer.x = e.clientX; pointer.y = e.clientY;
+      pointer.active = true; pointer.down = true;
+    }, { passive: true });
+    window.addEventListener("pointerup", function (e) {
+      pointer.down = false;
+      if (e.pointerType && e.pointerType !== "mouse") pointer.active = false;
+    }, { passive: true });
+    window.addEventListener("pointercancel", function () { pointer.down = false; pointer.active = false; });
+    window.addEventListener("pointerleave", function () { pointer.active = false; pointer.down = false; });
+    window.addEventListener("blur", function () { pointer.active = false; pointer.down = false; });
 
     var resizeTimer;
     window.addEventListener("resize", function () {
@@ -241,10 +519,10 @@
     });
 
     // re-read the accent colour when the theme flips
-    new MutationObserver(function () { rgb = accentRGB(); })
+    new MutationObserver(readTheme)
       .observe(root, { attributes: true, attributeFilter: ["data-theme"] });
 
     resize();
-    requestAnimationFrame(step);
+    requestAnimationFrame(frame);
   }
 })();
