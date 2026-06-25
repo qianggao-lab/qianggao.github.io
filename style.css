@@ -164,6 +164,36 @@ main,
   #bg-web, #bg-web-top { display: none; }
 }
 
+/* Black-hole summon button (home page, bottom-right). Subtle until hovered. */
+.bh-toggle {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 1200;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.bh-toggle:hover { opacity: 1; transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.bh-toggle:focus-visible { opacity: 1; }
+.bh-toggle svg { width: 24px; height: 24px; display: block; }
+.bh-toggle[aria-pressed="true"] {
+  opacity: 1;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft), var(--shadow-md);
+}
+@media (prefers-reduced-motion: reduce) { .bh-toggle { display: none; } }
+
 .section { padding-block: clamp(48px, 7vw, 84px); }
 .section--tight { padding-block: clamp(36px, 5vw, 56px); }
 

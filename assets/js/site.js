@@ -116,20 +116,23 @@
 
   /* ---- Cursor-reactive particle web + black-hole gadget ------------ */
   /* A field of drifting points linked by lines that lean toward the cursor
-     ("chasing" it). On the home page (canvas[data-blackhole]) a small
-     Interstellar-style black hole sits bottom-right: lead or drag the web
-     into it and it devours the points with a swirling accretion animation.
-     Devour every point and a white hole blooms bottom-left, spits them all
-     back out, then fades — repeatable. Colour tracks the --accent token. */
+     ("chasing" it). On the home page a small corner button summons an
+     Interstellar-style black hole (bottom-right): lead or drag the web into it
+     and it devours the points with a swirling accretion animation. Devour every
+     point and a white hole blooms bottom-left, spits them all back out, then
+     fades — repeatable; the last few survivors blink. Click the button again to
+     dismiss it. Until summoned, only the calm web shows. Colour tracks --accent. */
   var webCanvas = document.getElementById("bg-web");
   var reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (webCanvas && webCanvas.getContext && !reduceMotion) {
     var ctx = webCanvas.getContext("2d");
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    // The home page can host the black-hole gadget, but it stays hidden until
+    // the visitor summons it with the corner button, so it isn't a distraction.
+    // Until then the canvas just shows the calm ambient particle web.
     var home = webCanvas.hasAttribute("data-blackhole");
-    if (home) webCanvas.classList.add("bg-web--home");
-    // Home draws the gadget at full canvas opacity, so fade the web here.
-    var webAlpha = home ? 0.55 : 1;
+    var bhActive = false;
+    var webAlpha = 1; // faded to 0.55 only while the gadget is active
 
     // Second canvas, layered ABOVE the UI: when only a few stars remain we pulse
     // their light here (1 Hz) so it shines through the interface instead of being
@@ -143,6 +146,62 @@
       tctx = topCanvas.getContext("2d");
     }
     var BLINK_AT = 6; // start blinking once this many (or fewer) stars remain
+
+    // Corner button that summons / dismisses the gadget (home only).
+    var bhBtn = null;
+    if (home) {
+      bhBtn = document.createElement("button");
+      bhBtn.type = "button";
+      bhBtn.id = "bh-toggle";
+      bhBtn.className = "bh-toggle";
+      bhBtn.setAttribute("aria-pressed", "false");
+      bhBtn.setAttribute("aria-label", "Show the black-hole gadget");
+      bhBtn.title = "Black hole — click to play";
+      bhBtn.innerHTML =
+        '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+          '<defs><radialGradient id="bhGlyph" cx="50%" cy="50%" r="50%">' +
+            '<stop offset="52%" stop-color="#05060a"/>' +
+            '<stop offset="66%" stop-color="#0b0c12"/>' +
+            '<stop offset="76%" stop-color="rgba(255,168,78,0.95)"/>' +
+            '<stop offset="100%" stop-color="rgba(255,138,48,0)"/>' +
+          '</radialGradient></defs>' +
+          '<circle cx="12" cy="12" r="10" fill="url(#bhGlyph)"/>' +
+          '<ellipse cx="12" cy="12" rx="11" ry="3.1" fill="none" stroke="rgba(255,182,96,0.9)" stroke-width="1.4"/>' +
+        '</svg>';
+      document.body.appendChild(bhBtn);
+      bhBtn.addEventListener("click", function () { bhActive ? deactivate() : activate(); });
+    }
+
+    function updateBhButton() {
+      if (!bhBtn) return;
+      bhBtn.setAttribute("aria-pressed", String(bhActive));
+      bhBtn.setAttribute("aria-label", bhActive ? "Hide the black-hole gadget" : "Show the black-hole gadget");
+      bhBtn.title = bhActive ? "Black hole active — click to dismiss" : "Black hole — click to play";
+    }
+    function activate() {
+      bhActive = true;
+      webCanvas.classList.add("bg-web--home"); // full canvas opacity for the gadget
+      webAlpha = 0.55;                          // fade the web so the hole reads
+      phase = "idle"; captured = 0;
+      WH.on = false; WH.alpha = 0; WH.emit = 0;
+      updateBhButton();
+    }
+    function deactivate() {
+      bhActive = false;
+      webCanvas.classList.remove("bg-web--home");
+      webAlpha = 1;
+      phase = "idle"; captured = 0;
+      WH.on = false; WH.alpha = 0; WH.emit = 0;
+      sparks.length = 0;
+      // free any in-flight points and refill the ambient field
+      for (var di = 0; di < points.length; di++) { points[di].state = 0; points[di].immune = 0; }
+      while (TOTAL && points.length < TOTAL) {
+        points.push(makePoint(Math.random() * w, Math.random() * h,
+          (Math.random() - 0.5) * 0.4, (Math.random() - 0.5) * 0.4));
+      }
+      if (tctx) tctx.clearRect(0, 0, w, h);
+      updateBhButton();
+    }
 
     var points = [];
     var w = 0, h = 0, TOTAL = null;
@@ -237,13 +296,13 @@
       // Field fully devoured -> open the white hole and spit them back out.
       // Keyed on an empty field (not a counter) so it can't desync across
       // cycles or fire while a point is still spiralling in.
-      if (home && phase === "idle" && captured > 0 && points.length === 0) {
+      if (bhActive && phase === "idle" && captured > 0 && points.length === 0) {
         phase = "emit";
         WH.on = true; WH.alpha = 0; WH.emit = captured; WH.gap = 0;
       }
 
       // White-hole emission: stream the devoured points back into the field.
-      if (home && phase === "emit") {
+      if (bhActive && phase === "emit") {
         if (WH.emit > 0) {
           WH.alpha = Math.min(1, WH.alpha + 0.05);
           if (--WH.gap <= 0) {
@@ -290,7 +349,7 @@
         }
 
         // Black-hole gravity while feeding (skip freshly re-emitted points).
-        if (home && phase === "idle" && p.immune === 0) {
+        if (bhActive && phase === "idle" && p.immune === 0) {
           var gx = BH.x - p.x, gy = BH.y - p.y;
           var gd = Math.hypot(gx, gy);
           if (gd < CAPTURE) {
@@ -428,7 +487,7 @@
        it visible on both light and dark themes and matches the accretion disk. */
     function drawBlinkers() {
       tctx.clearRect(0, 0, w, h);
-      if (TOTAL === null || phase !== "idle" || (TOTAL - captured) > BLINK_AT) return;
+      if (!bhActive || TOTAL === null || phase !== "idle" || (TOTAL - captured) > BLINK_AT) return;
       // 0 -> 1 -> 0 once per second (1 Hz), driven by wall-clock time.
       var blink = 0.5 - 0.5 * Math.cos((performance.now() / 1000) * Math.PI * 2);
       var a = 0.14 + 0.86 * blink;       // pulsing opacity
@@ -452,7 +511,7 @@
       var base = "rgba(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ",";
 
       // Hole back-glow sits behind the web so points read as flowing over it.
-      if (home) {
+      if (bhActive) {
         ctx.save();
         ctx.globalAlpha = (phase === "emit") ? 0.4 : 1;
         drawBlackHoleBack(BH.x, BH.y);
@@ -506,7 +565,7 @@
       }
 
       // Event horizon on top, so spiralling points vanish beneath it.
-      if (home) {
+      if (bhActive) {
         ctx.save();
         ctx.globalAlpha = (phase === "emit") ? 0.5 : 1;
         drawBlackHoleFront(BH.x, BH.y);
@@ -529,7 +588,7 @@
       }
 
       // Live readout on top of the black hole.
-      if (home) drawCounter(BH.x, BH.y);
+      if (bhActive) drawCounter(BH.x, BH.y);
 
       // Survivor beacons: pulse the last few stars' light over the UI.
       if (tctx) drawBlinkers();
