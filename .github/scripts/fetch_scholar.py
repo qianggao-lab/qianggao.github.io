@@ -17,9 +17,15 @@ import urllib.request
 SCHOLAR_ID = "219Iw04AAAAJ"
 URL = f"https://scholar.google.com/citations?user={SCHOLAR_ID}&hl=en"
 
-# Resolve output path relative to this script so cwd doesn't matter.
+# Resolve paths relative to this script so cwd doesn't matter.
 OUT = os.path.normpath(
     os.path.join(os.path.dirname(__file__), "..", "..", "assets", "data", "scholar.json")
+)
+# Static fallback values live in publications.html (shown when the live fetch in
+# site.js is blocked or JavaScript is disabled). Kept in sync with OUT so the
+# page is correct even without JavaScript.
+PUB_HTML = os.path.normpath(
+    os.path.join(os.path.dirname(__file__), "..", "..", "publications.html")
 )
 
 HEADERS = {
@@ -35,6 +41,53 @@ def skip(message):
     """Log a warning and exit without touching the JSON file."""
     print(f"::warning::{message} — leaving scholar.json unchanged.")
     sys.exit(0)
+
+
+def patch_publications(citedby, hindex, i10index, updated_iso):
+    """Patch the static fallback metrics in publications.html to match.
+
+    Mirrors the presentation in assets/js/site.js: counts are rendered with a
+    thousands separator (Number.toLocaleString) and the date in en-US short form
+    (e.g. "Jun 29, 2026"), so the no-JavaScript fallback is identical to the live
+    render. Best-effort: on any read error or unexpected markup it warns and
+    leaves the file untouched rather than risk corrupting it.
+    """
+    try:
+        with open(PUB_HTML, encoding="utf-8") as handle:
+            html = handle.read()
+    except OSError as exc:
+        print(f"::warning::could not read publications.html ({exc}) — skipping HTML patch.")
+        return
+
+    dt = datetime.datetime.strptime(updated_iso, "%Y-%m-%d")
+    human_date = f"{dt.strftime('%b')} {dt.day}, {dt.year}"
+
+    # (regex, replacement) for each id'd span; \d[\d,]* matches the current
+    # value with or without an existing thousands separator.
+    subs = [
+        (r'(id="gs-citedby">)\d[\d,]*(</b>)', rf"\g<1>{citedby:,}\g<2>"),
+        (r'(id="gs-hindex">)\d[\d,]*(</b>)', rf"\g<1>{hindex:,}\g<2>"),
+        (r'(id="gs-i10">)\d[\d,]*(</b>)', rf"\g<1>{i10index:,}\g<2>"),
+        (r'(id="gs-updated">)[^<]*(</span>)', rf"\g<1>{human_date}\g<2>"),
+    ]
+
+    patched = html
+    for pattern, repl in subs:
+        patched, n = re.subn(pattern, repl, patched)
+        if n != 1:
+            print(
+                f"::warning::publications.html: expected 1 match for {pattern!r}, "
+                f"found {n} — skipping HTML patch."
+            )
+            return
+
+    if patched == html:
+        print("publications.html fallback already up to date.")
+        return
+
+    with open(PUB_HTML, "w", encoding="utf-8") as handle:
+        handle.write(patched)
+    print(f"Patched publications.html fallback: citedby={citedby:,}, updated={human_date}.")
 
 
 def main():
@@ -74,6 +127,9 @@ def main():
         handle.write("\n")
 
     print(f"Updated {OUT}: {data}")
+
+    # Keep the static no-JavaScript fallback in publications.html in sync.
+    patch_publications(citedby, hindex, i10index, data["updated"])
 
 
 if __name__ == "__main__":
