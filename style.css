@@ -378,10 +378,13 @@ html[data-theme="dark"] .theme-toggle .icon-moon { display: block; }
   font-weight: 500;
 }
 
-/* Research word cloud (home) — font size & weight track topic prevalence */
+/* Research word cloud (home) — font size & weight track topic prevalence.
+   Default (no-JS) is a centered flex wrap; wordcloud.js upgrades it to a
+   spiral-packed cloud (.is-cloud) with the largest words near the center
+   and a subset rotated vertical. */
 .wordcloud {
   list-style: none;
-  margin: 30px 0 0;
+  margin: 30px auto 0;
   padding: 0;
   display: flex;
   flex-wrap: wrap;
@@ -389,7 +392,6 @@ html[data-theme="dark"] .theme-toggle .icon-moon { display: block; }
   justify-content: center;
   gap: 8px 24px;
   max-width: 960px;
-  margin-inline: auto;
   text-align: center;
   line-height: 1.1;
 }
@@ -416,6 +418,25 @@ html[data-theme="dark"] .theme-toggle .icon-moon { display: block; }
 .wordcloud .wc-3 { font-size: clamp(1.1rem, 2.3vw, 1.5rem); color: var(--ink-soft); }
 .wordcloud .wc-2 { font-size: clamp(0.95rem, 1.8vw, 1.18rem); color: var(--muted); }
 .wordcloud .wc-1 { font-size: clamp(0.82rem, 1.4vw, 0.96rem); font-weight: 400; color: var(--muted); }
+
+/* JS-enhanced spiral layout: absolutely-positioned terms inside a relative box. */
+.wordcloud.is-cloud {
+  display: block;
+  position: relative;
+  gap: 0;
+  text-align: left;
+  overflow: hidden;        /* contains any sub-pixel/phantom overhang */
+}
+.wordcloud.is-cloud .wc {
+  position: absolute;
+  margin: 0;
+  white-space: nowrap;
+  transform-origin: 50% 50%;
+}
+/* In cloud mode each term carries an inline transform (scale) and possibly a
+   vertical writing-mode, so hover is a colour shift rather than a transform. */
+.wordcloud.is-cloud .wc:hover { color: var(--accent); }
+
 @media (max-width: 520px) {
   .wordcloud { gap: 6px 16px; }
 }

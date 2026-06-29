@@ -29,7 +29,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=2">
 </head>
 <body>
     <canvas id="bg-web" data-blackhole aria-hidden="true"></canvas>
@@ -151,27 +151,27 @@
                     exact and variational bounds on many-body systems to the physics of driven and
                     moiré materials.
                 </p>
-                <ul class="wordcloud" aria-label="Research topics, sized by how central each is to my work">
+                <ul class="wordcloud" id="wordcloud" aria-label="Research topics, sized by how central each is to my work">
                     <li class="wc wc-4">topological band theory</li>
                     <li class="wc wc-2">quasicrystals</li>
                     <li class="wc wc-4">Floquet systems</li>
-                    <li class="wc wc-3">quantum geometry</li>
+                    <li class="wc wc-3 wc-v">quantum geometry</li>
                     <li class="wc wc-4">moir&eacute; materials</li>
                     <li class="wc wc-2">open systems</li>
                     <li class="wc wc-5">quantum</li>
-                    <li class="wc wc-3">numerical bootstrap</li>
+                    <li class="wc wc-3 wc-v">numerical bootstrap</li>
                     <li class="wc wc-4">fractional Chern insulators</li>
                     <li class="wc wc-2">strong correlations</li>
                     <li class="wc wc-4">quantum Hall effect</li>
-                    <li class="wc wc-3">twisted bilayers</li>
-                    <li class="wc wc-2">nonequilibrium dynamics</li>
+                    <li class="wc wc-3 wc-v">twisted bilayers</li>
+                    <li class="wc wc-2 wc-v">nonequilibrium dynamics</li>
                     <li class="wc wc-4">flat bands</li>
                     <li class="wc wc-3">space-time crystals</li>
                     <li class="wc wc-1">quantum dots</li>
                     <li class="wc wc-3">quantum many-body</li>
-                    <li class="wc wc-2">semiclassical dynamics</li>
+                    <li class="wc wc-2 wc-v">semiclassical dynamics</li>
                     <li class="wc wc-3">flat-band superconductors</li>
-                    <li class="wc wc-1">non-Hermitian systems</li>
+                    <li class="wc wc-1 wc-v">non-Hermitian systems</li>
                 </ul>
             </div>
         </section>
@@ -233,5 +233,6 @@
     </footer>
 
     <script src="assets/js/site.js" defer></script>
+    <script src="assets/js/wordcloud.js?v=1" defer></script>
 </body>
 </html>
