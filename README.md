@@ -1,6 +1,6 @@
 # qianggao.github.io
 
-Personal academic website of **Qiang Gao** — postdoctoral fellow in physics at Harvard University.
+Personal academic website of **Qiang Gao** — postdoctoral associate in physics at MIT.
 
 Static site (HTML + CSS + a little vanilla JS), no build step. Served by GitHub Pages.
 
